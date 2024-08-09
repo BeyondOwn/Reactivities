@@ -1,4 +1,5 @@
-import { Activity } from "@/app/models/activity";
+import { useActivitiesStore } from "@/app/stores/ActivitiesStore";
+import { useFilterStore } from "@/app/stores/FilterStore";
 import {
   Card,
   CardContent,
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import axios from "axios";
 import { format } from "date-fns";
-import { observer } from "mobx-react-lite";
 import { useRouter } from "next/navigation";
 import { FC } from 'react';
 import { z } from "zod";
@@ -22,14 +22,13 @@ import { Button } from "../components/ui/button";
 import { ActivityForm, formSchema } from "./ActivityForm";
 
 interface ActivitiesListProps {
-  activities: Activity[]
-  filterValue:string
 }
 
 
-const ActivitiesList: FC<ActivitiesListProps> = ({activities,filterValue}:ActivitiesListProps) => {
+const ActivitiesList: FC<ActivitiesListProps> = () => {
   const router = useRouter();
-  
+  const filterValue = useFilterStore((state) => state.filterValue);
+  const activities = useActivitiesStore((state) => state.activities)
 
   async function onSubmit(values: z.infer<typeof formSchema>,id?:number,) {
     await axios.put("http://localhost:5039/api/Activities/id",values,{
@@ -61,14 +60,17 @@ const ActivitiesList: FC<ActivitiesListProps> = ({activities,filterValue}:Activi
     router.push(`http://localhost:3000/activity/${id}`)
   }
 
+
     if (filterValue == "date")
     {
       activities.sort((a, b) =>
       new Date(b.date).getTime() - new Date(a.date).getTime()
       )
+      console.log(filterValue)
   }
   else {
     activities.sort((a, b) => a.id - b.id);
+    console.log(filterValue)
   }
   
   
@@ -109,4 +111,4 @@ const ActivitiesList: FC<ActivitiesListProps> = ({activities,filterValue}:Activi
   )
 }
 
-export default observer(ActivitiesList)
+export default ActivitiesList

@@ -1,3 +1,4 @@
+import { useFilterStore } from "@/app/stores/FilterStore";
 import {
   Select,
   SelectContent,
@@ -8,14 +9,13 @@ import {
 import { FC } from 'react';
 
 interface FilterProps {
-  onFilterChange:(newState:string)=>void
-  filterValue: string
 }
 
 
 
-const Filter: FC<FilterProps> = ({onFilterChange,filterValue}) => {
-  
+const Filter: FC<FilterProps> = () => {
+
+  const onFilterChange = useFilterStore((state) => state.setFilterValue)
 
   return <div className="flex items-center gap-1">
     <h1 className="">Filter By</h1>

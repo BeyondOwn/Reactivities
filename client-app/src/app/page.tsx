@@ -1,36 +1,19 @@
 'use client'
-import { Activity } from "@/app/models/activity";
 import ActivitiesList from "@/components/ActivitiesList";
 import Filter from "@/components/Filter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import { useState } from "react";
+import { useActivitiesStore } from "./stores/ActivitiesStore";
 
-export async function fetchGetAll(url: string): Promise<Activity[]> {
-  const result = await axios.get<Activity[]>(url)
-  console.log(result.data)
-  return result.data;
-}
 
-export const useGetFetchQuery = (key:QueryKey) => {
-  const queryClient = useQueryClient();
-
-  return queryClient.getQueryData(key);
-};
 
 export default function Home() {
-  const [filterValue,setFilterValue] = useState("")
 
-  const handleFilterChange = (newState:string) => {
-    setFilterValue(newState);
-  };
+  const getActivities = useActivitiesStore((state) => state.useActivities)
+  getActivities();
+  const isPending = useActivitiesStore((state) => state.isPending)
+  const isError = useActivitiesStore((state) => state.isError)
+  const error = useActivitiesStore((state) => state.error)
   
-  const { isPending, isError, data, error } = useQuery({
-    queryKey: ['activities'],
-    queryFn: ()=>fetchGetAll("http://localhost:5039/api/Activities"),
-  })
-
 
   if (isPending) {
     return(<div className="flex justify-center items-center h-[calc(92dvh+4px)] bg-gray-400 bg-opacity-50">
@@ -39,7 +22,7 @@ export default function Home() {
   }
 
   if (isError) {
-    return <span>{error.message}</span>
+    return <span>{error?.message}</span>
   }
 
   return (
@@ -49,8 +32,8 @@ export default function Home() {
     
     <div className="flex w-full gap-8 justify-center mt-4">
     <div className="max-w-screen-md w-full flex flex-col items-center gap-2">
-      <Filter filterValue ={filterValue} onFilterChange={handleFilterChange}></Filter>
-        <ActivitiesList filterValue ={filterValue} activities={data} />
+      <Filter ></Filter>
+        <ActivitiesList />
     </div>
       {/* <ActivityForm className="hidden sm:flex max-w-[26rem] w-full flex-col bg-white h-fit  border-4 border-black p-2 rounded-md"/> */}
     </div>
