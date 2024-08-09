@@ -1,9 +1,16 @@
+import Navbar from "@/components/Navbar";
+import { cn } from "@/lib/utils";
 import ReactQueryProvider from "@/utils/ReactQueryProvider";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = FontSans({ subsets: ["latin"] });
+
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,8 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={cn(
+          "min-h-screen font-sans antialiased",
+          fontSans.variable
+        )}>
         <ReactQueryProvider>
+        <Navbar/>
         {children}
         </ReactQueryProvider>
         </body>
