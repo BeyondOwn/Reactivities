@@ -14,6 +14,7 @@ namespace Application.Activities
     {
         public class Query : IRequest<List<Activity>>
         {
+            public int results { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, List<Activity>>

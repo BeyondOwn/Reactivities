@@ -19,7 +19,7 @@ const router = useRouter();
       }
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mt-4">
     <ActivityForm onSubmitFnc={onCreate}  className="max-w-[85vw]  max-w-[22rem] lg:max-w-[32rem] w-full bg-white p-2 rounded-md"/>
     </div>
     )

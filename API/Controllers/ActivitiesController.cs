@@ -21,6 +21,14 @@ namespace API.Controllers
             return await Mediator.Send(new Details.Query { Id = id });
         }
 
+        [HttpGet("/asd/{pageNumber}")]
+        public async Task<ActionResult<PaginatedResult<Activity>>> GetActivities(int pageNumber, int pageSize = 10)
+        {
+            var query = new GetPage.Query { PageNumber = pageNumber, PageSize = pageSize };
+            var result = await Mediator.Send(query);
+            return Ok(result);
+        }
+
         [HttpPost]
 
         public async Task<IActionResult> CreateActivity(Activity activity)

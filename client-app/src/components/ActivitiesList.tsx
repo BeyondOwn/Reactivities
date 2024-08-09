@@ -66,11 +66,11 @@ const ActivitiesList: FC<ActivitiesListProps> = () => {
       activities.sort((a, b) =>
       new Date(b.date).getTime() - new Date(a.date).getTime()
       )
-      console.log(filterValue)
+      // console.log(filterValue)
   }
   else {
     activities.sort((a, b) => a.id - b.id);
-    console.log(filterValue)
+    // console.log(filterValue)
   }
   
   

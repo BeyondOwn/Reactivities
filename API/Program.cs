@@ -1,6 +1,9 @@
 using API.Extensions;
 using Application.Activities;
 using Application.Core;
+using Domain;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Writers;
@@ -12,6 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation()
+.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<Create>();
+
 builder.Services.AddApplicationServices(builder.Configuration);
 var app = builder.Build();
 
