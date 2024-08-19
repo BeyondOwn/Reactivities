@@ -1,65 +1,60 @@
 'use client'
-import ActivitiesList from "@/components/ActivitiesList";
-import Filter from "@/components/Filter";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { useEffect, useRef } from "react";
-import { useActivitiesStore } from "./stores/ActivitiesStore";
+import DisplayActivities from "@/components/DisplayActivites"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
+import { Login, formSchema as LoginSchema } from "@/components/Login"
+import { Register, formSchema as RegisterSchema } from "@/components/Register"
+import { useUser } from "@/utils/UserContext"
+import axios from "axios"
+import { useRouter } from "next/navigation"
+import { FC } from "react"
+import { z } from "zod"
+import { useUserStore } from "./stores/userStore"
 
 
-
-export default function Home() {
-
-  const getActivities = useActivitiesStore((state) => state.useActivities)
-  getActivities();
-  const status = useActivitiesStore((state) => state.status)
-  const error = useActivitiesStore((state) => state.error)
-  const hasNextPage = useActivitiesStore((state) => state.hasNextPage)
-  const fetchNextPage = useActivitiesStore((state) => state.fetchNextPage)
-  const isFetchingNextPage = useActivitiesStore((state) => state.isFetchingNextPage)
-
-  const observerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 1.0 }
-    );
-    if (observerRef.current) observer.observe(observerRef.current);
-
-    return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
-    };
-  }, [fetchNextPage, hasNextPage]);
-
-  if (status === 'pending') {
-    return(<div className="flex justify-center items-center h-[calc(92dvh+4px)] bg-gray-400 bg-opacity-50">
-      <LoadingSpinner className="h-32 w-32 md:w-80 md:h-80 text-blue-500"></LoadingSpinner>
-    </div>) 
-  }
-
-  if (status === 'error') {
-    return <span>{error?.message}</span>
-  }
-
-  return (
-    // <div className="flex flex-col items-center text-xl w-full">
-    // <GetAllActivities className=" w-[48rem]" url=/>
-    // </div>
-    
-    <div className="flex w-full gap-8 justify-center mt-4">
-    <div className="max-w-screen-md w-full flex flex-col items-center gap-2">
-      <Filter ></Filter>
-        <ActivitiesList />
-        <div ref={observerRef} style={{ height: 20, background: 'transparent' }}>
-        {isFetchingNextPage && <p>Loading more...</p>}
-      </div>
-    </div>
-      {/* <ActivityForm className="hidden sm:flex max-w-[26rem] w-full flex-col bg-white h-fit  border-4 border-black p-2 rounded-md"/> */}
-    </div>
-    
-  );
+interface pageProps {
 }
+
+const Page: FC<pageProps> = ({}) => {
+const router = useRouter();
+const login = useUserStore((state)=> state.login)
+    async function onRegister(values: z.infer<typeof RegisterSchema>) {
+        await axios.post("http://localhost:5039/api/Account/register",values,{
+          headers:{
+            "Content-Type":"application/json",
+          },
+        });
+        window.location.href="/"
+        // router.refresh();
+        // Doesnt work im calling window.location.reload from login
+      }
+
+      async function onLogin(values: z.infer<typeof LoginSchema>) {
+        login(values)
+        // router.refresh();
+      }
+
+      const { user, loading, error } = useUser();
+      console.log(user);
+
+      if (loading) return <LoadingSpinner></LoadingSpinner>
+
+      if (error) return <div>{error.message}</div>
+
+  return <div className="w-full flex flex-col gap-4 mt-3 items-center">
+    {user
+    ? (
+      <div className="flex flex-col w-full">
+        <h1 className="w-fit place-self-center">Welcome Back {user?.displayName}</h1>
+        <DisplayActivities/>
+        </div>
+    )
+    :(<>
+    <Register onSubmitFnc={onRegister} className="max-w-[85vw]  max-w-[22rem] lg:max-w-[32rem] w-full  p-2 rounded-md" />
+    <Login onSubmitFnc={onLogin} className="max-w-[85vw]  max-w-[22rem] lg:max-w-[32rem] w-full  p-2 rounded-md" />
+    </>)
+  }
+    
+  </div>
+}
+
+export default Page

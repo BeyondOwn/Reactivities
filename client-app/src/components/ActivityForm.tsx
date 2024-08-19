@@ -17,10 +17,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/utils/UserContext"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { FC, useState } from 'react'
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -39,11 +39,14 @@ const formSchema = z.object({
     category: z.string().min(2).optional(),
     city: z.string().min(2).optional(),
     venue: z.string().min(2).optional(),
+    UsersId:z.string(),
+    UserDisplayName:z.string(),
   })
 
 const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:ActivityFormProps) => {
     const [date, setDate] = useState<Date>()
-    const router = useRouter();
+    const {error,loading,user} = useUser();
+
 
     const handleDateChange = (date:Date | undefined) => {
         if (date){
@@ -60,6 +63,8 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
           city:"asd",
           venue:"asd",
           category:"asd",
+          UsersId:user?.id,
+          UserDisplayName:user?.displayName,
         },
       })
 
@@ -67,9 +72,11 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
         onSubmitFnc(values, form.getValues().id);
       };
 
+      const defaultStyles = 'border-2 bg-card text-card-foreground';
+      const combinedStyles = `${defaultStyles} ${className || ''}`;
 
   return (
-    <div className={className}>
+    <div className={combinedStyles}>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
 

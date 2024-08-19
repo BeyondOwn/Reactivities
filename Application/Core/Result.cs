@@ -1,0 +1,26 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MediatR;
+
+namespace Application.Core
+{
+    public class Result<T>
+    {
+        public bool IsSucces { get; set; }
+
+        public T Value { get; set; }
+
+        public string Error { get; set; }
+
+        public static Result<T> Succes(T value) => new Result<T> { IsSucces = true, Value = value };
+
+        public static Result<T> Failure(string error) => new Result<T> { IsSucces = false, Error = error };
+
+        internal static Result<Unit> Succes(bool result)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

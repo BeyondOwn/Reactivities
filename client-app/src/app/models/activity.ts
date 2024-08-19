@@ -6,4 +6,6 @@ export interface Activity {
     category:string
     city:string
     venue:string
+    usersId:string,
+    userDisplayName:string,
 }

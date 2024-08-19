@@ -20,7 +20,7 @@ const Filter: FC<FilterProps> = () => {
   return <div className="flex items-center gap-1">
     <h1 className="">Filter By</h1>
     <Select onValueChange={onFilterChange}>
-  <SelectTrigger  className="w-[180px] font-bold bg-white ring-0 focus:ring-0">
+  <SelectTrigger  className="w-[180px] font-bold ring-0 focus:ring-0">
     <SelectValue placeholder="Id" />
   </SelectTrigger>
   <SelectContent>
