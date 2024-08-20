@@ -17,10 +17,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { useActivities } from "@/utils/useActivities"
 import { useUser } from "@/utils/UserContext"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { FC, useState } from 'react'
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -28,7 +30,7 @@ import { z } from "zod"
 interface ActivityFormProps {
   className?:string
   activities?: Activity
-  onSubmitFnc: (values: z.infer<typeof formSchema>,id?: number) => Promise<void>;
+  onSubmitFnc: (values: z.infer<typeof formSchema>,router:any,refetch:any,id?: number) => Promise<void>;
 }
 
 const formSchema = z.object({
@@ -41,6 +43,9 @@ const formSchema = z.object({
     venue: z.string().min(2).optional(),
     creatorId:z.string(),
     creatorDisplayName:z.string(),
+    // users:z.any(),
+    // userActivities:z.any()
+    
     // userActivity : z.object({
     //   userId: z.string(),
     //   displayName: z.string(),
@@ -53,7 +58,8 @@ const formSchema = z.object({
 const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:ActivityFormProps) => {
     const [date, setDate] = useState<Date>()
     const {error,loading,user} = useUser();
-
+    const refetch = useActivities().refetch;
+    const router = useRouter();
 
     const handleDateChange = (date:Date | undefined) => {
         if (date){
@@ -71,12 +77,13 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
           venue:"asd",
           category:"asd",
           creatorId:user?.id,
-          creatorDisplayName:user?.displayName
+          creatorDisplayName:user?.displayName,
+          // users:null,
+          // userActivities:[]
         },
       })
-
       const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
-        onSubmitFnc(values, form.getValues().id);
+        onSubmitFnc(values, router,refetch,form.getValues().id);
       };
 
       const defaultStyles = 'border-2 bg-card text-card-foreground';

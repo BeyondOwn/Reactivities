@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240819161037_DisplayName")]
-    partial class DisplayName
+    [Migration("20240820122553_initialFR")]
+    partial class initialFR
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -153,7 +153,6 @@ namespace Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserId", "ActivityId");
@@ -321,8 +320,7 @@ namespace Persistence.Migrations
                         .WithMany("UserActivities")
                         .HasForeignKey("DisplayName")
                         .HasPrincipalKey("DisplayName")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Activity");
 

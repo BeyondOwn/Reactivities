@@ -7,6 +7,7 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain;
 using MediatR;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Persistence;
@@ -40,8 +41,11 @@ namespace Application.Activities
 
                 if (activity == null) return null;
 
-                if (activity.CreatorId != user.Id) return Result<Unit>.Failure("Unauthorized, you are not owner of the activity");
+                request.Activity.Users = user;
 
+                if (activity.CreatorId != user?.Id) return Result<Unit>.Failure("Unauthorized, you are not owner of the activity");
+
+                //if mapping over null values can lead to Delete entire row.
                 _mapper.Map(request.Activity, activity);
 
                 var result = await _context.SaveChangesAsync() > 0;

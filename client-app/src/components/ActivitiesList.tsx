@@ -1,7 +1,7 @@
 import { Attendance } from "@/app/models/Attendance";
 import { useActivitiesStore } from "@/app/stores/ActivitiesStore";
+import { useAttendanceStore } from "@/app/stores/AttendanceStore";
 import { useFilterStore } from "@/app/stores/FilterStore";
-import { useUserStore } from "@/app/stores/userStore";
 import {
   Card,
   CardContent,
@@ -16,114 +16,32 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import agent from "@/utils/agent";
+import { onDelete, onJoin, onLeave, onSubmit, onView } from "@/utils/crudUtils";
 import { useActivities } from "@/utils/useActivities";
 import { useUser } from "@/utils/UserContext";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import { FC, useEffect, useState } from 'react';
-import { toast } from "react-toastify";
-import { z } from "zod";
+import { FC, useEffect, useRef, useState } from 'react';
 import { Button } from "../components/ui/button";
-import { ActivityForm, formSchema } from "./ActivityForm";
+import { ActivityForm } from "./ActivityForm";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 interface ActivitiesListProps {
 }
 
 
-const ActivitiesList: FC<ActivitiesListProps> = () => {
+export const ActivitiesList: FC<ActivitiesListProps> = () => {
   const router = useRouter();
   const filterValue = useFilterStore((state) => state.filterValue);
-  const activities = useActivitiesStore((state) => state.activities)
-  const setActivities = useActivitiesStore((state)=> state.setActivities)
-  const userAttendance = useUserStore((state) => state.userAttendance)
-  const setUserAttendance = useUserStore((state) => state.setUserAttendance)
+  const userAttendance = useAttendanceStore((state) => state.userAttendance)
+  const setUserAttendance = useAttendanceStore((state) => state.setUserAttendance)
+  const userAttendanceUpdated = useAttendanceStore((state)=> state.userAttendanceUpdated)
+  const activityAttendanceUpdated = useAttendanceStore((state)=> state.activityAttendanceUpdated)
+  const activityAttendance = useAttendanceStore((state)=> state.activityAttendance)
+  const setActivityAttendance = useAttendanceStore((state)=> state.setActivityAttendance)
+  // const setAttendanceUpdated = useAttendanceStore((state)=>state.setUserAttendanceUpdated)
   const {user} = useUser();
-  const [attendanceUpdated, setAttendanceUpdated] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const {data} = useActivities();
-
-  async function onSubmit(values: z.infer<typeof formSchema>,id?:number,) {
-   try{
-    await agent.requests.put(`http://localhost:5039/api/Activities/id?id=${id}`,values)
-    location.reload();
-   } 
-   catch(error){
-    console.log(error);
-   }
-    
-    
-  }
-
-
-  async function onDelete(id:number) {
-   try{
-    await agent.requests.del(`http://localhost:5039/api/Activities/id?id=${id}`)
-    setRefreshKey((prevKey) => prevKey + 1); // Increment key to trigger re-fetch
-    // location.reload();
-   }
-   catch(error){
-    console.log(error);
-   }
-    
-  }
-
-  const onView = (id:number) => {
-    router.push(`http://localhost:3000/activity/${id}`)
-  }
-
-
-    if (filterValue == "date")
-    {
-      activities.sort((a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-      )
-      // console.log(filterValue)
-  }
-  else {
-    activities.sort((a, b) => a.id - b.id);
-    // console.log(filterValue)
-  }
-
-  async function onJoin(activityId:number) {
-    try{
-      await agent.requests.post(`http://localhost:5039/api/ActivityAttendance/`,{
-        userId:user?.id,
-        activityId:activityId,
-        displayName:user?.displayName
-      })
-
-      setAttendanceUpdated((prev) => !prev);
-      toast.success("You joined the activity");
-      // router.push(`http://localhost:3000/activity/${activityId}`)
-     } 
-     catch(error){
-      console.log(error);
-     }
-  }
-
-  async function onLeave(activityId:number) {
-    try{
-      await agent.requests.del(`http://localhost:5039/api/ActivityAttendance/`,{
-        userId:user?.id,
-        activityId:activityId,
-      },
-      {
-        headers:{
-          "Content-Type":"application/json"
-        }
-      }
-    )
-      setAttendanceUpdated((prev) => !prev);
-      toast.info("You left the activity");
-     } 
-     catch(error){
-      console.log(error);
-     }
-  //  window.location.reload();
-  }
-  
- 
 
   useEffect(()=>{
     async function getAttendance(){
@@ -138,19 +56,105 @@ const ActivitiesList: FC<ActivitiesListProps> = () => {
       }
     getAttendance();
     
-  },[attendanceUpdated])
+  },[userAttendanceUpdated,setUserAttendance,user])
+
+  useEffect(()=>{
+    async function getActivityAttendance(){
+      try{
+        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/`) as Attendance[];
+      setActivityAttendance(activityAttendanceh);
+      console.log(activityAttendanceh.length);
+      }catch(error){
+        console.log(error)
+      }
+    }
+    getActivityAttendance();
+  },[activityAttendanceUpdated])
 
   useEffect(()=>{
 
   },[refreshKey])
 
+  const {
+    data,
+    refetch,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useActivities();
+  
+  const setActivities = useActivitiesStore((state) => state.setActivities);
+
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (data) {
+      const allActivities = data.pages.flatMap((page) => page.items);
+      setActivities(allActivities);
+    }
+  }, [data, setActivities]);
+
+  const {
+    activities,
+    status: storeStatus,
+    error: storeError,
+    fetchNextPage: storeFetchNextPage,
+    hasNextPage: storeHasNextPage,
+    isFetchingNextPage: storeIsFetchingNextPage,
+    isFetching: storeIsFetching,
+  } = useActivitiesStore();
+
+  if (filterValue == "date")
+    {
+      activities.sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+      // console.log(filterValue)
+  }
+  else {
+    activities.sort((a, b) => a.id - b.id);
+    // console.log(filterValue)
+  }
+
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [fetchNextPage, hasNextPage]);
+
+  if (status === 'pending') {
+    return(<div className="flex justify-center items-center h-[calc(92dvh+4px)]">
+      <LoadingSpinner className="h-32 w-32 md:w-80 md:h-80 text-blue-500"></LoadingSpinner>
+    </div>) 
+  }
+
+  if (status === 'error') {
+    return <span>{error?.message}</span>
+  }
+
   if (userAttendance == null) return <LoadingSpinner></LoadingSpinner>
+  if (user == null) return <LoadingSpinner></LoadingSpinner>
   
   return (
     <>
     {activities.map((todo,index) => {
       const isAttending = userAttendance.find((elem) => elem.activityId === todo.id);
-      const isCreator = userAttendance.find((elem) => elem.userId === todo.creatorId);
+      const isCreator = user.id === todo.creatorId;
+      const activityAttendancePersonalized = activityAttendance?.filter((elem)=> elem.activityId === todo.id)
       return (
         <div className="max-w-[90%] lg:max-w-screen-md w-full flex flex-col" key={todo.id.toString()}>
           <Card className="flex flex-col rounded-none p-4 bg-card" >
@@ -165,18 +169,19 @@ const ActivitiesList: FC<ActivitiesListProps> = () => {
           <CardFooter>
             <p>{todo.city}</p>
           </CardFooter>
+          <CardContent className="flex justify-end">There are {activityAttendancePersonalized?.length} participants</CardContent>
           <div className="flex justify-evenly md:justify-end lg:mr-4 gap-3">
           {!isCreator && isAttending ? 
-          (<Button className="bg-red-500 hover:bg-red-600 w-20" onClick={()=>onLeave(todo.id)}>Leave</Button>)
+          (<Button className="bg-red-600 hover:bg-red-700 w-20" onClick={()=>onLeave(todo.id,user)}>Leave</Button>)
           : !isCreator && !isAttending ?
-          (<Button className="bg-purple-500 hover:bg-purple-600 w-20" onClick={()=>onJoin(todo.id)}>Join</Button>)
+          (<Button className="bg-purple-600 hover:bg-purple-700 w-20" onClick={()=>onJoin(todo.id,user)}>Join</Button>)
           : null
         }
-          <Button className="bg-green-500 hover:bg-green-600 w-20" onClick={()=>onView(todo.id)}>View</Button>
+          <Button className="bg-green-600 hover:bg-green-700 w-20" onClick={()=>onView(todo.id,router)}>View</Button>
           
           {isCreator && (
             <Dialog>
-            <DialogTrigger><Button className="bg-blue-500 hover:bg-blue-600 w-20">Edit</Button></DialogTrigger>
+            <DialogTrigger><Button className="bg-blue-600 hover:bg-blue-700 w-20">Edit</Button></DialogTrigger>
             <DialogContent className=" w-full  h-fit overflow-auto lg:max-h-screen max-h-[85vh]  max-w-[85vw] lg:max-w-[32rem]">
               <ActivityForm className="p-4 rounded-md " onSubmitFnc={onSubmit} activities={activities[index]}/>
             </DialogContent>
@@ -184,7 +189,7 @@ const ActivitiesList: FC<ActivitiesListProps> = () => {
           ) }
           
           {isCreator && (
-            <Button className="bg-red-500 hover:bg-red-600 w-20" onClick={()=>onDelete(todo.id)}>Delete</Button>
+            <Button className="bg-red-600 hover:bg-red-700 w-20" onClick={()=>onDelete(todo.id,refetch)}>Delete</Button>
           )}
           </div>
           {/* <div className="flex justify-center">
@@ -194,9 +199,13 @@ const ActivitiesList: FC<ActivitiesListProps> = () => {
           
           </div>
       )
-          
+      
 })}
+  <div ref={observerRef} style={{ height: 20, background: 'transparent' }}>
+        {isFetchingNextPage && <p>Loading more...</p>}
+      </div>
     </>
+    
   )
 }
 

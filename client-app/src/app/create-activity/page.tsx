@@ -1,13 +1,14 @@
 'use client'
 import { ActivityForm, formSchema } from "@/components/ActivityForm";
 import agent from "@/utils/agent";
-import { useUser } from "@/utils/UserContext";
+import { useActivities } from "@/utils/useActivities";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { z } from "zod";
 
 export default function CreateActivity(){
 const router = useRouter();
-const {error,loading,user} = useUser();
+const refetch = useActivities().refetch;
 
     async function onCreate(values: z.infer<typeof formSchema>) {
       // values["userActivity"] = 
@@ -18,9 +19,12 @@ const {error,loading,user} = useUser();
       //     "activityId": 0,
       //     "activity": "string"
       //   }
+      
       console.log(values)
         await agent.requests.post("http://localhost:5039/api/Activities",values);
         console.log(values);
+        refetch();
+        toast.success(`Created activity succesfully!`)
         router.push("/")
       }
 

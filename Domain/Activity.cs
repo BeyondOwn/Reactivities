@@ -19,7 +19,7 @@ namespace Domain
         public string CreatorId { get; set; }
         public AppUser? Users { get; set; }
 
-        public ICollection<UserActivity> UserActivities { get; set; }
+        public ICollection<UserActivity>? UserActivities { get; set; } = new List<UserActivity>();
 
     }
 }

@@ -35,13 +35,13 @@ namespace Persistence
             modelBuilder.Entity<UserActivity>()
             .HasOne(u => u.User)
             .WithMany(a => a.UserActivities)
-            .HasForeignKey(aa => aa.UserId)
+            .HasForeignKey(u => u.UserId)
             .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserActivity>()
            .HasOne(u => u.User)
            .WithMany(a => a.UserActivities)
-           .HasForeignKey(aa => aa.DisplayName)
+           .HasForeignKey(u => u.DisplayName)
            .HasPrincipalKey(u => u.DisplayName)
            .OnDelete(DeleteBehavior.NoAction);
 
@@ -49,7 +49,7 @@ namespace Persistence
             modelBuilder.Entity<UserActivity>()
             .HasOne(u => u.Activity)
             .WithMany(a => a.UserActivities)
-            .HasForeignKey(a => a.ActivityId)
+            .HasForeignKey(u => u.ActivityId)
             .OnDelete(DeleteBehavior.NoAction);
 
         }

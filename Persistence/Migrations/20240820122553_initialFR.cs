@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class DisplayName : Migration
+    public partial class initialFR : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -191,7 +191,7 @@ namespace Persistence.Migrations
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ActivityId = table.Column<int>(type: "int", nullable: false),
-                    DisplayName = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    DisplayName = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {

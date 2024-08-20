@@ -35,8 +35,22 @@ namespace Application.Activities
                 {
                     var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == _userAccesor.GetUsername());
                     var activity = await _context.Activities.FindAsync(request.Id);
-
+                    var activityAttendances = await _context.UserActivities.Where(u => u.ActivityId == request.Id).ToListAsync();
+                    // foreach (var attendance in activityAttendances)
+                    // {
+                    //     Console.WriteLine($"UserId: {attendance.UserId}, ActivityId: {attendance.ActivityId}");
+                    //     // Add more properties as needed
+                    // }
                     if (activity == null) return null;
+
+                    if (activityAttendances != null)
+                    {
+                        foreach (var attendance in activityAttendances)
+                        {
+                            var row = await _context.UserActivities.FindAsync(attendance?.UserId, attendance?.ActivityId);
+                            _context.Remove(row);
+                        }
+                    }
 
                     if (activity.CreatorId != user.Id) return Result<Unit>.Failure("Unauthorized, you are not owner of the activity");
                     _context.Remove(activity);

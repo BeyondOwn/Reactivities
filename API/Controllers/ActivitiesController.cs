@@ -39,11 +39,10 @@ namespace API.Controllers
 
         }
 
-        [HttpPut("id")]
+        [HttpPut("edit/id")]
 
         public async Task<IActionResult> EditActivity(int id, Activity activity)
         {
-            activity.Id = id;
             var result = await Mediator.Send(new Edit.Command { Activity = activity });
 
             if (!result.IsSucces)

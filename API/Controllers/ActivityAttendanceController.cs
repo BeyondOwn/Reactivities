@@ -12,6 +12,14 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ActivityAttendance : BaseApiController
     {
+        [HttpGet]
+        public async Task<IActionResult> GetAtendances()
+        {
+            var query = new GetActivitieAttendances.Query();
+            var result = await Mediator.Send(query);
+            return HandleResult(result);
+        }
+
         [HttpGet("userId/{UserId}")]
         public async Task<IActionResult> GetActivitiesByUserId(string userId)
         {
