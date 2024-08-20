@@ -1,5 +1,6 @@
 import agent from "@/utils/agent";
 import { create } from "zustand";
+import { Attendance } from "../models/Attendance";
 import { LoginFormValues, User } from "../models/user";
 import { useCommonStore } from "./commonStore";
 
@@ -11,7 +12,8 @@ interface userstoreProps{
     LoggingIn:(user:User)=>void
     isLoggedIn:boolean
     getUser:()=>void,
-    
+    userAttendance: Attendance[] | null,
+    setUserAttendance:(attendance:Attendance[])=>void
 }
 
 
@@ -48,5 +50,10 @@ export const useUserStore = create<userstoreProps>((set) => ({
         window.localStorage.removeItem('jwt');
         useUserStore.setState((state)=> ({user:null}))
         window.location.href="/"
-    }
+    },
+    userAttendance:null,
+    setUserAttendance: (attendance:Attendance[]) => {
+        set((state) => ({userAttendance:attendance}))
+    },
+    
 }))

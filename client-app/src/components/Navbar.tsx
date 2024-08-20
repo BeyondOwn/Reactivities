@@ -50,7 +50,7 @@ const Navbar: FC<NavbarProps> = ({}) => {
       <DropdownMenuTrigger asChild>
         <CircleUserRound className='w-10 h-10'/>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent className="w-56 bg-card">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

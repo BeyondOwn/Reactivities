@@ -17,35 +17,40 @@ namespace Persistence
         {
             base.OnModelCreating(modelBuilder);
 
-            // modelBuilder.Entity<Activity>()
-            //     .HasOne(e => e.Users)
-            //     .WithMany(u => u.Activities)
-            //     .HasForeignKey(e => e.UserDisplayName)
-            //     .HasPrincipalKey(u => u.DisplayName);
+            modelBuilder.Entity<Activity>()
+                .HasOne(e => e.Users)
+                .WithMany(u => u.Activities)
+                .HasForeignKey(e => e.CreatorDisplayName)
+                .HasPrincipalKey(u => u.DisplayName);
 
-            // modelBuilder.Entity<Activity>()
-            //     .HasOne(e => e.Users)
-            //     .WithMany(u => u.Activities)
-            //     .HasForeignKey(e => e.UsersId)
-            //     .HasPrincipalKey(u => u.Id);
+            modelBuilder.Entity<Activity>()
+                .HasOne(e => e.Users)
+                .WithMany(u => u.Activities)
+                .HasForeignKey(e => e.CreatorId)
+                .HasPrincipalKey(u => u.Id);
 
-            modelBuilder.Entity<AppUser>()
-           .HasMany(u => u.Activities)
-           .WithMany(a => a.Users)
-           .UsingEntity<UserActivity>(
-               j => j
-                   .HasOne(ua => ua.Activity)
-                   .WithMany(a => a.UserActivities)
-                   .HasForeignKey(ua => ua.ActivityId),
-               j => j
-                   .HasOne(ua => ua.User)
-                   .WithMany(u => u.UserActivities)
-                   .HasForeignKey(ua => ua.UserId),
-               j =>
-               {
-                   j.HasKey(t => new { t.UserId, t.ActivityId });  // Composite key
-                   j.ToTable("UserActivities");  // Specify the join table name
-               });
+            //Primary key of joint table
+            modelBuilder.Entity<UserActivity>(x => x.HasKey(aa => new { aa.UserId, aa.ActivityId }));
+
+            modelBuilder.Entity<UserActivity>()
+            .HasOne(u => u.User)
+            .WithMany(a => a.UserActivities)
+            .HasForeignKey(aa => aa.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserActivity>()
+           .HasOne(u => u.User)
+           .WithMany(a => a.UserActivities)
+           .HasForeignKey(aa => aa.DisplayName)
+           .HasPrincipalKey(u => u.DisplayName)
+           .OnDelete(DeleteBehavior.NoAction);
+
+
+            modelBuilder.Entity<UserActivity>()
+            .HasOne(u => u.Activity)
+            .WithMany(a => a.UserActivities)
+            .HasForeignKey(a => a.ActivityId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         }
 

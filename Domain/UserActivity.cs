@@ -8,9 +8,12 @@ namespace Domain
     public class UserActivity
     {
         public string UserId { get; set; }
+        public string? DisplayName { get; set; }
         public AppUser? User { get; set; }
 
         public int ActivityId { get; set; }
         public Activity? Activity { get; set; }
+
+
     }
 }

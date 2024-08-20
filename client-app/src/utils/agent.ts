@@ -1,6 +1,6 @@
 import { LoginFormValues, RegisterFormValues, User } from "@/app/models/user"
 import { useCommonStore } from "@/app/stores/commonStore"
-import axios, { AxiosError, AxiosResponse } from "axios"
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios"
 import { toast } from "react-toastify"
 
 
@@ -40,6 +40,7 @@ axios.interceptors.response.use(async response =>{
             case 400:
                 if (typeof data == 'string'){
                     toast.error(data)
+                    break;
                 }
                 if (config.method === 'get' && data.errors.hasOwnProperty('id')) {
                     window.location.href='/not-found';
@@ -63,7 +64,7 @@ axios.interceptors.response.use(async response =>{
                 toast.error('Not found')
                 break;
             case 500:
-                window.location.href="/server-error"
+                // window.location.href="/server-error"
                 break;
         }
         return Promise.reject(error);
@@ -71,9 +72,11 @@ axios.interceptors.response.use(async response =>{
 
     const requests = {
         get: <T>(url: string) => axios.get<T>(url).then(responseBody),
-        post: <T>(url: string, body: {}) => axios.post<T>(url, body).then(responseBody),
+        post: <T>(url: string, body: {}) =>
+             axios.post<T>(url, body).then(responseBody),
         put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
-        del: <T>(url: string) => axios.delete<T>(url).then(responseBody)
+        del: <T>(url: string, body?: {},config?: AxiosRequestConfig) => 
+            axios.delete<T>(url, { data: body, ...config }).then(responseBody)
     }
 
   

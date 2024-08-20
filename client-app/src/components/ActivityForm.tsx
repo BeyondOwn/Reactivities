@@ -39,8 +39,15 @@ const formSchema = z.object({
     category: z.string().min(2).optional(),
     city: z.string().min(2).optional(),
     venue: z.string().min(2).optional(),
-    UsersId:z.string(),
-    UserDisplayName:z.string(),
+    creatorId:z.string(),
+    creatorDisplayName:z.string(),
+    // userActivity : z.object({
+    //   userId: z.string(),
+    //   displayName: z.string(),
+    //   user: z.string(),
+    //   activityId: z.number(),
+    //   activity: z.string()
+    // })
   })
 
 const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:ActivityFormProps) => {
@@ -63,8 +70,8 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
           city:"asd",
           venue:"asd",
           category:"asd",
-          UsersId:user?.id,
-          UserDisplayName:user?.displayName,
+          creatorId:user?.id,
+          creatorDisplayName:user?.displayName
         },
       })
 

@@ -17,7 +17,7 @@ namespace Application.Activities
         {
             public class Command : IRequest<Result<Unit>>
             {
-                public string userId { get; set; }
+                public UserActivity UserActivity { get; set; }
             }
 
             public class Handler : IRequestHandler<Command, Result<Unit>>
@@ -34,11 +34,11 @@ namespace Application.Activities
                 public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
                 {
                     var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == _userAccesor.GetUsername());
-                    var attendance = await _context.UserActivities.FindAsync(request.userId);
+                    var attendance = await _context.UserActivities.FindAsync(request.UserActivity?.UserId, request.UserActivity?.ActivityId);
 
-                    if (attendance == null) return null;
+                    if (attendance == null) return Result<Unit>.Failure("Attendance doesn't exist!");
 
-                    if (attendance.UserId != user.Id) return Result<Unit>.Failure("Unauthorized, you can only delete your own attendance");
+                    if (attendance?.UserId != user?.Id) return Result<Unit>.Failure("Unauthorized, you can only delete your own attendance");
                     _context.Remove(attendance);
 
 

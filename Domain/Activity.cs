@@ -17,7 +17,7 @@ namespace Domain
         public string Venue { get; set; }
         public string CreatorDisplayName { get; set; }
         public string CreatorId { get; set; }
-        public ICollection<AppUser> Users { get; set; }
+        public AppUser? Users { get; set; }
 
         public ICollection<UserActivity> UserActivities { get; set; }
 

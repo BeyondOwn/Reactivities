@@ -36,11 +36,11 @@ namespace API.Controllers
 
         }
 
-        [HttpDelete("userId")]
+        [HttpDelete]
 
-        public async Task<IActionResult> DeleteAttendance(string userId)
+        public async Task<IActionResult> DeleteAttendance(UserActivity attendance)
         {
-            var result = await Mediator.Send(new DeleteAttendance.Command { userId = userId });
+            var result = await Mediator.Send(new DeleteAttendance.Command { UserActivity = attendance });
 
             if (!result.IsSucces)
             {

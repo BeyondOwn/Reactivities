@@ -37,12 +37,12 @@ namespace Application.Activities
 
                 var attendance = await _context.UserActivities.FindAsync(request.UserActivity.UserId, request.UserActivity.ActivityId);
 
-                if (request.UserActivity.UserId == attendance.UserId &&
-                request.UserActivity.ActivityId == attendance.ActivityId)
-                    return Result<Unit>.Failure("Attendance already exists");
+                if (request?.UserActivity.UserId == attendance?.UserId &&
+                request?.UserActivity.ActivityId == attendance?.ActivityId)
+                    return Result<Unit>.Failure("You already Attend!");
 
-                if (request.UserActivity.UserId != user.Id) return Result<Unit>.Failure("Unauthorized, you can only attend for yourself");
-                _context.UserActivities.Add(request.UserActivity);
+                if (request?.UserActivity.UserId != user?.Id) return Result<Unit>.Failure("Unauthorized, you can only attend for yourself");
+                _context.UserActivities.Add(request?.UserActivity);
 
                 var result = await _context.SaveChangesAsync() > 0;
 
