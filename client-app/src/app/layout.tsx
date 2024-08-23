@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+import { LoadingProvider } from "@/utils/LoadingContext";
 import ReactQueryProvider from "@/utils/ReactQueryProvider";
 import { UserProvider } from "@/utils/UserContext";
 import type { Metadata } from "next";
@@ -33,6 +34,7 @@ export default function RootLayout({
           "min-h-screen font-sans antialiased",
           fontSans.variable
         )}>
+           <LoadingProvider>
           <UserProvider>
           <ThemeProvider
             attribute="class"
@@ -57,6 +59,7 @@ export default function RootLayout({
         </ReactQueryProvider>
         </ThemeProvider>
         </UserProvider>
+        </LoadingProvider>
         </body>
     </html>
   );

@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240820122553_initialFR")]
-    partial class initialFR
+    [Migration("20240822105015_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,41 @@ namespace Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ActivityPosts", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatorDisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CreatorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("CreatorDisplayName");
+
+                    b.HasIndex("Id", "ActivityId")
+                        .IsUnique();
+
+                    b.ToTable("ActivityPosts");
+                });
 
             modelBuilder.Entity("Domain.Activity", b =>
                 {
@@ -297,6 +332,26 @@ namespace Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ActivityPosts", b =>
+                {
+                    b.HasOne("Domain.Activity", "Activity")
+                        .WithMany("ActivityPosts")
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.AppUser", "Users")
+                        .WithMany("ActivityPosts")
+                        .HasForeignKey("CreatorDisplayName")
+                        .HasPrincipalKey("DisplayName")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("Domain.Activity", b =>
                 {
                     b.HasOne("Domain.AppUser", "Users")
@@ -380,12 +435,16 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Activity", b =>
                 {
+                    b.Navigation("ActivityPosts");
+
                     b.Navigation("UserActivities");
                 });
 
             modelBuilder.Entity("Domain.AppUser", b =>
                 {
                     b.Navigation("Activities");
+
+                    b.Navigation("ActivityPosts");
 
                     b.Navigation("UserActivities");
                 });

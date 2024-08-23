@@ -1,7 +1,6 @@
-import { Activity } from "./activity";
 
-export interface paginatedResults {
-    items:Activity[],
+export interface paginatedResults<T> {
+    items:T[],
     pageNumber:number,
     pageSize:number,
     totalCount:number,

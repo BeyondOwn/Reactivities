@@ -23,14 +23,15 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { FC, useState } from 'react'
+import { Dispatch, FC, SetStateAction, useState } from 'react'
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 interface ActivityFormProps {
   className?:string
-  activities?: Activity
-  onSubmitFnc: (values: z.infer<typeof formSchema>,router:any,refetch:any,id?: number) => Promise<void>;
+  givenActivity?: Activity
+  onSubmitFnc: (values: z.infer<typeof formSchema>,router:any,refetch:any,setOpen:Dispatch<SetStateAction<number | null>>,id?: number) => Promise<void>,
+  setOpen:Dispatch<SetStateAction<number | null>>
 }
 
 const formSchema = z.object({
@@ -55,11 +56,13 @@ const formSchema = z.object({
     // })
   })
 
-const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:ActivityFormProps) => {
+const ActivityForm: FC<ActivityFormProps> = ({className,givenActivity,onSubmitFnc,setOpen}:ActivityFormProps) => {
     const [date, setDate] = useState<Date>()
     const {error,loading,user} = useUser();
     const refetch = useActivities().refetch;
     const router = useRouter();
+
+    console.log(givenActivity);
 
     const handleDateChange = (date:Date | undefined) => {
         if (date){
@@ -70,7 +73,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-          id: activities?.id,
+          id: givenActivity?.id,
           date: new Date(Date.now()),
           description: "something boring",
           city:"asd",
@@ -83,7 +86,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
         },
       })
       const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
-        onSubmitFnc(values, router,refetch,form.getValues().id);
+        onSubmitFnc(values, router,refetch,setOpen,form.getValues().id);
       };
 
       const defaultStyles = 'border-2 bg-card text-card-foreground';
@@ -101,7 +104,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
             <FormItem>
               <FormLabel>Id</FormLabel>
               <FormControl>
-                <Input defaultValue={activities?.id.toString()} {...field} />
+                <Input defaultValue={givenActivity?.id.toString()} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,7 +119,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input defaultValue={activities?.title} placeholder="shadcn" {...field} />
+                <Input defaultValue={givenActivity?.title} placeholder="shadcn" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -167,7 +170,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input defaultValue={activities?.description} placeholder="shadcn" {...field} />
+                <Input defaultValue={givenActivity?.description} placeholder="shadcn" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -181,7 +184,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
             <FormItem>
               <FormLabel>Category</FormLabel>
               <FormControl>
-                <Input defaultValue={activities?.category} placeholder="shadcn" {...field} />
+                <Input defaultValue={givenActivity?.category} placeholder="shadcn" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -195,7 +198,7 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input defaultValue={activities?.city} placeholder="shadcn" {...field} />
+                <Input defaultValue={givenActivity?.city} placeholder="shadcn" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -209,13 +212,14 @@ const ActivityForm: FC<ActivityFormProps> = ({className,activities,onSubmitFnc}:
             <FormItem>
               <FormLabel>Venue</FormLabel>
               <FormControl>
-                <Input defaultValue={activities?.venue} placeholder="shadcn" {...field} />
+                <Input defaultValue={givenActivity?.venue} placeholder="shadcn" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit">Submit</Button>
+        
       </form>
     </Form>
     </div>

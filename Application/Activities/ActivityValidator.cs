@@ -18,5 +18,7 @@ namespace Application.Activities
             RuleFor(x => x.Category).NotEmpty();
             RuleFor(x => x.Venue).NotEmpty();
         }
+
+
     }
 }

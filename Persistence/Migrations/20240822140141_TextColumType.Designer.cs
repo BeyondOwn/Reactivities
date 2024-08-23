@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240822140141_TextColumType")]
+    partial class TextColumType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,19 +48,11 @@ namespace Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ParentPostId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");
 
                     b.HasIndex("CreatorDisplayName");
-
-                    b.HasIndex("ParentPostId");
 
                     b.HasIndex("Id", "ActivityId")
                         .IsUnique();
@@ -352,14 +347,7 @@ namespace Persistence.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ActivityPosts", "ParentPost")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentPostId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Activity");
-
-                    b.Navigation("ParentPost");
 
                     b.Navigation("Users");
                 });
@@ -443,11 +431,6 @@ namespace Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ActivityPosts", b =>
-                {
-                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Domain.Activity", b =>

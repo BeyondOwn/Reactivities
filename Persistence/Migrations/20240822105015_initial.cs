@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class initialFR : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -186,6 +186,32 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ActivityPosts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActivityId = table.Column<int>(type: "int", nullable: false),
+                    CreatorId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatorDisplayName = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivityPosts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivityPosts_Activities_ActivityId",
+                        column: x => x.ActivityId,
+                        principalTable: "Activities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ActivityPosts_AspNetUsers_CreatorDisplayName",
+                        column: x => x.CreatorDisplayName,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "DisplayName");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserActivities",
                 columns: table => new
                 {
@@ -212,6 +238,22 @@ namespace Persistence.Migrations
                 name: "IX_Activities_CreatorId",
                 table: "Activities",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityPosts_ActivityId",
+                table: "ActivityPosts",
+                column: "ActivityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityPosts_CreatorDisplayName",
+                table: "ActivityPosts",
+                column: "CreatorDisplayName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityPosts_Id_ActivityId",
+                table: "ActivityPosts",
+                columns: new[] { "Id", "ActivityId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -266,6 +308,9 @@ namespace Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ActivityPosts");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 

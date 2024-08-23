@@ -1,6 +1,8 @@
+import { Attendance } from "@/app/models/Attendance";
 import { User } from "@/app/models/user";
 import { useAttendanceStore } from "@/app/stores/AttendanceStore";
 import { formSchema } from "@/components/ActivityForm";
+import { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import agent from "./agent";
@@ -8,20 +10,84 @@ import agent from "./agent";
 
 const setUserAttendanceUpdated = useAttendanceStore.getState().setUserAttendanceUpdated
 const setActivityAttendanceUpdated = useAttendanceStore.getState().setActivityAttendanceUpdated
+// const setJoinIsLoading = useAttendanceStore.getState().setJoinIsLoading;
+// const setLeaveIsLoading = useAttendanceStore.getState().setLeaveIsLoading;
+const setUserAttendance = useAttendanceStore.getState().setUserAttendance
+const setActivityAttendance = useAttendanceStore.getState().setActivityAttendance
 
-export async function onJoin(activityId:number,user:User|null,) {
+export async function onJoin(activityId:number,user:User|null,setLoadingState: (id: number, isLoading: boolean) => void) {
     try{
+      setLoadingState(activityId, true); // Start loading
       const userAttendanceUpdated = useAttendanceStore.getState().userAttendanceUpdated
       const activityAttendanceUpdated = useAttendanceStore.getState().activityAttendanceUpdated
-      await agent.requests.post(`http://localhost:5039/api/ActivityAttendance/`,{
-        userId:user?.id,
-        activityId:activityId,
-        displayName:user?.displayName
-      })
+      const userAttendancePrev = useAttendanceStore.getState().userAttendance;
+      const activityAttendancePrev = useAttendanceStore.getState().activityAttendance;
 
-      setUserAttendanceUpdated(userAttendanceUpdated);
+      const newAttendance: Attendance = {
+        userId: user?.id!,
+        activityId: activityId,
+        user: null,
+        activity: null,
+      }
+      userAttendancePrev?.push(newAttendance);
+     
+        // Optimistically update the UI
+        if (userAttendancePrev !=null){
+          setUserAttendance(userAttendancePrev);
+          // setUserAttendanceUpdated(userAttendanceUpdated);
+        }
+
+        const newActAttendance : Attendance = {
+          userId: user?.id!,
+          activityId: activityId,
+          user:null,activity:null,
+          displayName:user?.displayName,
+        }
+        activityAttendancePrev?.push(newAttendance);
+        if (activityAttendancePrev !=null){
+          setActivityAttendance(activityAttendancePrev);
+        }
+        setLoadingState(activityId, false);
+        toast.success("You joined the activity");
+        try{
+          await agent.requests.post(`http://localhost:5039/api/ActivityAttendance/`,{
+            userId:user?.id,
+            activityId:activityId,
+            displayName:user?.displayName
+          })
+        }
+        catch(error){
+          userAttendancePrev?.pop();
+          if(userAttendancePrev !=null)
+          {
+          setUserAttendance(userAttendancePrev);
+          setUserAttendanceUpdated(userAttendanceUpdated);
+          }
+          activityAttendancePrev?.pop();
+          if (activityAttendancePrev !=null){
+            setActivityAttendance(activityAttendancePrev)
+            setActivityAttendanceUpdated(activityAttendanceUpdated);
+          }
+          console.log(error)
+        }
+      
+      //Setting User attendance
+      const userAttendance = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/userId/${user?.id}`) as Attendance[];
+          setUserAttendance(userAttendance);
+      //Setting Activity attendance
+      if (window.location.href.includes("/activity/")){
+        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/activityId/${activityId}`) as Attendance[];
+      setActivityAttendance(activityAttendanceh);
+      }
+      else{
+        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/`) as Attendance[];
+      setActivityAttendance(activityAttendanceh);
+      }
+      
+      //
       setActivityAttendanceUpdated(activityAttendanceUpdated);
-      toast.success("You joined the activity");
+      setUserAttendanceUpdated(userAttendanceUpdated);
+      // setLoadingState(activityId, false); // Stop loading
       // router.push(`http://localhost:3000/activity/${activityId}`)
      } 
      catch(error){
@@ -29,7 +95,106 @@ export async function onJoin(activityId:number,user:User|null,) {
      }
   }
 
-  export async function onSubmit(values: z.infer<typeof formSchema>,router:any,refetch:any,id?:number) {
+  export async function onLeave(activityId:number,user:User|null,setLoadingState: (id: number, isLoading: boolean) => void) {
+    try{
+     setLoadingState(activityId, true); // Start loading
+     const userAttendanceUpdated = useAttendanceStore.getState().userAttendanceUpdated
+     const activityAttendanceUpdated = useAttendanceStore.getState().activityAttendanceUpdated
+     const userAttendancePrev = useAttendanceStore.getState().userAttendance;
+     const activityAttendancePrev = useAttendanceStore.getState().activityAttendance as Attendance[];
+      const newAttendance: Attendance = {
+        userId: user?.id!,
+        activityId: activityId,
+        user: null,
+        activity: null,
+      }
+      const indexToRemove = userAttendancePrev?.findIndex(
+        (elem) => elem.activityId === activityId && elem.userId === user?.id
+      );
+      const Backup:Attendance | undefined = userAttendancePrev?.find((elem) => elem.activityId === activityId && elem.userId === user?.id)
+       // If an element is found (index is not -1), remove it from the array
+       if(indexToRemove !=undefined)
+       {if (indexToRemove !== -1) {
+        userAttendancePrev?.splice(indexToRemove, 1);
+      }}
+
+      const BackupActivityAttendance:Attendance | undefined = activityAttendancePrev?.find((elem)=> elem.activityId === activityId)
+      const indexToRemoveActivityAttendance = activityAttendancePrev?.findIndex((elem)=> elem.activityId === activityId);
+      if (indexToRemoveActivityAttendance !=undefined){
+        if (indexToRemoveActivityAttendance !== -1){
+          activityAttendancePrev?.splice(indexToRemoveActivityAttendance,1);
+        }
+      }
+        // Optimistically update the UI
+        if (userAttendancePrev !=null){
+          setUserAttendance(userAttendancePrev);
+          if (activityAttendancePrev !=null)
+          {
+            setActivityAttendance(activityAttendancePrev);
+          }
+          // setUserAttendanceUpdated(userAttendanceUpdated);
+        }
+        toast.info("You left the activity");
+         setLoadingState(activityId, false); // Start loading
+      try{
+        await agent.requests.del(`http://localhost:5039/api/ActivityAttendance/`,{
+          userId:user?.id,
+          activityId:activityId,
+        },
+        {
+          headers:{
+            "Content-Type":"application/json"
+          }
+        }
+      )
+      }
+      catch(error){
+        if (indexToRemove !=undefined){
+          if (Backup!=undefined){
+            userAttendancePrev?.splice(indexToRemove,0,Backup)
+          }
+          if (!indexToRemoveActivityAttendance != undefined){
+            if (BackupActivityAttendance !=undefined){
+              activityAttendancePrev.splice(indexToRemoveActivityAttendance,0,BackupActivityAttendance)
+            }
+          }
+        }
+      
+      if(userAttendancePrev !=null)
+      {
+      setUserAttendance(userAttendancePrev);
+      setUserAttendanceUpdated(userAttendanceUpdated);
+      }
+      if(activityAttendancePrev !=null){
+        setActivityAttendance(activityAttendancePrev);
+        setActivityAttendanceUpdated(activityAttendanceUpdated);
+      }
+      console.log(error)
+    }
+     //Setting User attendance
+     const userAttendance = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/userId/${user?.id}`) as Attendance[];
+     setUserAttendance(userAttendance);
+     //Setting Activity attendance
+     if (window.location.href.includes("/activity/")){
+      const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/activityId/${activityId}`) as Attendance[];
+      setActivityAttendance(activityAttendanceh);
+     }
+     else{
+      const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/`) as Attendance[];
+     setActivityAttendance(activityAttendanceh);
+     }
+     //
+      setUserAttendanceUpdated(userAttendanceUpdated);
+      setActivityAttendanceUpdated(activityAttendanceUpdated);
+      // setLoadingState(activityId, false);
+     } 
+     catch(error){
+      console.log(error);
+     }
+  //  window.location.reload();
+  }
+
+  export async function onSubmit(values: z.infer<typeof formSchema>,router:any,refetch:any,setOpen:Dispatch<SetStateAction<number|null>>,id?:number) {
     try{
      await agent.requests.put(`http://localhost:5039/api/Activities/edit/id?id=${id}`,values)
      if(window.location.href.includes("/activity/")){
@@ -38,6 +203,7 @@ export async function onJoin(activityId:number,user:User|null,) {
     }
       else{
           refetch();
+          setOpen(null);
       }
       toast.info(`Edited activity id:${id}`);
     } 
@@ -69,35 +235,10 @@ export async function onJoin(activityId:number,user:User|null,) {
    }
  
    export async function onView(id:number,router:any) {
-    const activityAttendanceUpdated = useAttendanceStore.getState().activityAttendanceUpdated
+    // const activityAttendanceUpdated = useAttendanceStore.getState().activityAttendanceUpdated
+
      router.push(`http://localhost:3000/activity/${id}`)
-     setActivityAttendanceUpdated(activityAttendanceUpdated)
+    //  setActivityAttendanceUpdated(activityAttendanceUpdated)
    }
  
- 
-   
- 
-   export async function onLeave(activityId:number,user:User|null) {
-     try{
-      const userAttendanceUpdated = useAttendanceStore.getState().userAttendanceUpdated
-      const activityAttendanceUpdated = useAttendanceStore.getState().activityAttendanceUpdated
-       await agent.requests.del(`http://localhost:5039/api/ActivityAttendance/`,{
-         userId:user?.id,
-         activityId:activityId,
-       },
-       {
-         headers:{
-           "Content-Type":"application/json"
-         }
-       }
-     )
-       setUserAttendanceUpdated(userAttendanceUpdated);
-       setActivityAttendanceUpdated(activityAttendanceUpdated);
-       toast.info("You left the activity");
-      } 
-      catch(error){
-       console.log(error);
-      }
-   //  window.location.reload();
-   }
 

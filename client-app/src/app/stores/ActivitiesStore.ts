@@ -20,8 +20,8 @@ export async function fetchGetAll(url: string): Promise<Activity[]> {
     return result.data;
   }
  
-  export async function fetchPage(pageParam:number): Promise<paginatedResults> {
-    const result = await axios.get<paginatedResults>(`http://localhost:5039/api/${pageParam}`)
+  export async function fetchPage(pageParam:number): Promise<paginatedResults<Activity>> {
+    const result = await axios.get<paginatedResults<Activity>>(`http://localhost:5039/api/${pageParam}`)
     // console.log(result.data)
     return result.data;
   }

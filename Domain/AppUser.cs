@@ -11,6 +11,8 @@ namespace Domain
         public string DisplayName { get; set; }
         public string Bio { get; set; }
         public ICollection<Activity> Activities { get; set; }
+
+        public ICollection<ActivityPosts> ActivityPosts { get; set; }
         public ICollection<UserActivity> UserActivities { get; set; }
 
     }
