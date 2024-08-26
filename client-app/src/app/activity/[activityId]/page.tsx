@@ -22,6 +22,7 @@ import { useUser } from "@/utils/UserContext";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -82,7 +83,7 @@ export default function Page({params}:activityIdInterface) {
 
   
 
-  const onSubmitPost = async (postRef:HTMLTextAreaElement,parentPostId?:any) =>{
+  const onSubmitPost = async (postRef:HTMLTextAreaElement,postsToScrollTo:Post[],parentPostId?:any) =>{
     if (postRef){
       const textAreaValue = postRef.value;
     const post = {
@@ -95,14 +96,27 @@ export default function Page({params}:activityIdInterface) {
     try{
       const res = await axios.post(`http://localhost:5039/api/Posts`,post)
       refetchPost();
-      if (postRef !=null){
-        postRef.value = "";
+      try{
+        const posts = await agent.requests.get(`http://localhost:5039/api/Posts/${params.activityId}`) as Post[];
+      setPosts(posts);
       }
-      
-      
-      if (posts !=null){
-        setShouldScrollTo(posts[posts?.length-1].id.toString())
+      catch(error){
+        console.log(error);
       }
+      finally{
+        if (postRef !=null){
+          postRef.value = "";
+        }
+        
+        
+        if (posts !=null){
+          setShouldScrollTo(postsToScrollTo[postsToScrollTo?.length-1].id.toString())
+        }
+      }
+
+      
+
+      
       toast.success("Posted Succesfully");
     }catch(error){
       console.log(error);
@@ -147,6 +161,20 @@ useEffect(()=>{
     
   },[activityAttendanceUpdated])
 
+
+  const {
+    data: dataPost,
+    refetch: refetchPost,
+    error:errorPost,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = usePosts(params.activityId);
+  
+  const setPosts = usePostsStore((state) => state.setPosts);
+
   useEffect(()=>{
     async function getPosts(){
       try{
@@ -166,19 +194,6 @@ useEffect(()=>{
       setLoadinPost(true);
     }
   },[])
-
-  const {
-    data: dataPost,
-    refetch: refetchPost,
-    error:errorPost,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = usePosts(params.activityId);
-  
-  const setPosts = usePostsStore((state) => state.setPosts);
   
   const observerRef = useRef<HTMLDivElement>(null);
 
@@ -206,6 +221,10 @@ useEffect(()=>{
       if (observerRef.current) observer.unobserve(observerRef.current);
     };
   }, [fetchNextPage, hasNextPage]);
+
+  useEffect(()=>{
+    
+  },[posts])
 
 
   if (status === 'pending') {
@@ -242,8 +261,9 @@ useEffect(()=>{
   const topLevelPosts = posts.filter((elem)=>elem.parentPostId === null);
   return (
     <div className="w-full max-h-[100%] flex flex-col items-center mt-4">
-      <Button onClick={()=>router.back}>Back</Button>
-    <div className="flex flex-col lg:max-w-screen-md w-full max-w-[90%]">
+      <div className="flex  lg:max-w-[824px] lg:mr-14 w-full max-w-[90%]">
+      <Button className="hidden lg:block bg-secondary-dark rounded-full hover:bg-secondary mr-1"   onClick={()=>router.back()}><ArrowLeft className="text-bg-secondary"/></Button>
+    <div className="flex flex-col lg:max-w-screen-md w-full max-w-[100%]">
     <Card className="flex flex-col  rounded-md pb-2 mb-2" >
           <CardHeader>
             <CardTitle>{data.title}</CardTitle>
@@ -302,9 +322,6 @@ useEffect(()=>{
             <Button className="bg-red-600 hover:bg-red-700 w-20" onClick={()=>onDelete(params.activityId,refetch,router)}>Delete</Button>
           )}
 
-          {isCreator && (
-            <Button className="bg-red-600 hover:bg-red-700 w-20" onClick={()=>onDelete(params.activityId,refetch,router)}>Reply</Button>
-          )}
           </div>
 
           
@@ -322,7 +339,7 @@ useEffect(()=>{
                     }} className="" placeholder="Type your thoughts here." onFocus={()=>{setIsFocused(true)}} /> 
                     {isFocused && (
                         <div>
-                            <Button className="place-self-center mt-2 mr-2" onClick={()=>onSubmitPost(textAreaRef.current[data.id])}>Submit</Button>
+                            <Button className="place-self-center mt-2 mr-2" onClick={()=>onSubmitPost(textAreaRef.current[data.id],data)}>Comment</Button>
                             <Button className='w-20 bg-red-600 hover:bg-red-700' onClick={()=>setIsFocused(false)}>Cancel</Button>
                         </div>
                     )
@@ -332,13 +349,15 @@ useEffect(()=>{
           </div>
           </Card>
           </div>
+          </div>
          
           {/* Comment Section */}
         {loadingPost ? <LoadingSpinner /> : (
           <div className="w-full max-h-[100%] flex flex-col items-center mt-4 gap-6">
             {topLevelPosts.map(post => (
+              <div className="rounded-md border max-w-[90%] lg:max-w-screen-md w-full flex flex-col" key={post.id}> 
               <CardRecuring
-                className="border-none"
+                className="border-none shadow-none drop-shadow-none"
                 key={post.id}
                 post={post}
                 posts={posts}
@@ -346,6 +365,7 @@ useEffect(()=>{
                 scrollToRef={scrollToRef}
                 onSubmitPost={onSubmitPost}
               />
+          </div>
             ))}
             <div ref={observerRef} style={{ height: 20, background: 'transparent' }}>
           {isFetchingNextPage && <p>Loading more...</p>}

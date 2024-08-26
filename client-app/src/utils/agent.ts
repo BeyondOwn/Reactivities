@@ -1,3 +1,5 @@
+import { Photo } from "@/app/models/photo"
+import { Profile } from "@/app/models/profile"
 import { LoginFormValues, RegisterFormValues, User } from "@/app/models/user"
 import { useCommonStore } from "@/app/stores/commonStore"
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios"
@@ -13,6 +15,8 @@ const sleep = (delay: number) => {
 const axiosInstance = axios.create({
     baseURL:"http://localhost:5039/api",
 })
+
+const baseURL = "http://localhost:5039/api"
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
@@ -85,9 +89,23 @@ axios.interceptors.response.use(async response =>{
         login: (user: LoginFormValues) => requests.post<User>('http://localhost:5039/api/Account/login', user),
         register: (user: RegisterFormValues) => requests.post<User>('http://localhost:5039/api/Account/register', user)
     }
+
+    const Profiles = {
+        get: (username:string) => requests.get<Profile>(`${baseURL}/Profiles/${username}`),
+        uploadPhoto: (file:Blob) =>{
+            let formData = new FormData();
+            formData.append('File',file);
+            return axios.post<Photo>(`${baseURL}/Photos`,formData,{
+                headers:{'Content-Type':'multipart/form-data'}
+            });
+        },
+        setMainPhoto: (id:string) => requests.post(`${baseURL}/Photos/${id}/setMain`, {}),
+        deletePhoto: (id:string) => requests.del(`${baseURL}/Photos/${id}`)
+    }
     const agent = {
         Account,
-        requests
+        requests,
+        Profiles
     }
     
     export default agent;

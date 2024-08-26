@@ -240,5 +240,9 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
      router.push(`http://localhost:3000/activity/${id}`)
     //  setActivityAttendanceUpdated(activityAttendanceUpdated)
    }
+
+   export async function onSetMainPhoto(id:string){
+    return await agent.Profiles.setMainPhoto(id);
+   }
  
 

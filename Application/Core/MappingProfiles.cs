@@ -13,6 +13,8 @@ namespace Application.Core
         {
             CreateMap<Activity, Activity>();
             CreateMap<ActivityPosts, ActivityPosts>();
+            CreateMap<AppUser, Profiles.Profile>()
+                .ForMember(x => x.Image, o => o.MapFrom(s => s.Photos.FirstOrDefault(d => d.isMain).Url));
         }
     }
 }

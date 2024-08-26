@@ -8,6 +8,7 @@ using Application.Interfaces;
 using Domain;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Infrastructure.Photos;
 using Infrastructure.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,8 @@ namespace API.Extensions
             {
                 opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
             });
+            Services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
+            Services.AddScoped<IPhotoAccesor, PhotoAccesor>();
             return Services;
         }
 

@@ -31,7 +31,6 @@ import { Skeleton } from "./ui/skeleton";
 interface ActivitiesListProps {
 }
 
-
 export const ActivitiesList: FC<ActivitiesListProps> = () => {
   const router = useRouter();
   const filterValue = useFilterStore((state) => state.filterValue);
@@ -95,6 +94,7 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
 
   },[refreshKey])
 
+
   const {
     data,
     refetch,
@@ -104,18 +104,19 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
     isFetching,
     isFetchingNextPage,
     status,
+    activities:activitiesFromHook
   } = useActivities();
   
   const setActivities = useActivitiesStore((state) => state.setActivities);
 
   const observerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (data) {
-      const allActivities = data.pages.flatMap((page) => page.items);
-      setActivities(allActivities);
-    }
-  }, [data, setActivities]);
+  // useEffect(() => {
+  //   if (activitiesFromHook) {
+      
+  //     setActivities(activitiesFromHook);
+  //   }
+  // }, [data, setActivities]);
 
   const {
     activities,
@@ -129,13 +130,13 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
 
   if (filterValue == "date")
     {
-      activities.sort((a, b) =>
+      activitiesFromHook?.sort((a, b) =>
       new Date(b.date).getTime() - new Date(a.date).getTime()
       )
       // console.log(filterValue)
   }
   else {
-    activities.sort((a, b) => a.id - b.id);
+    activitiesFromHook?.sort((a, b) => a.id - b.id);
     // console.log(filterValue)
   }
 
@@ -162,6 +163,8 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
     </div>) 
   }
 
+  if (data == null) return <LoadingSpinner></LoadingSpinner>
+
   if (status === 'error') {
     return <span>{error?.message}</span>
   }
@@ -171,7 +174,7 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
   
   return (
     <>
-    {activities.map((todo,index) => {
+    {activitiesFromHook?.map((todo,index) => {
       const isAttending = userAttendance?.find((elem) => elem.activityId === todo.id);
       const isCreator = user.id === todo.creatorId;
       const activityAttendancePersonalized = activityAttendance?.filter((elem)=> elem.activityId === todo.id)

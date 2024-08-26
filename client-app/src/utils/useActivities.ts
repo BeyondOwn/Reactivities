@@ -15,7 +15,7 @@ async function fetchPage(pageParam:number): Promise<paginatedResults<Activity>> 
   }
 
 export const useActivities =() =>{
-    return useInfiniteQuery({
+    const queryResult = useInfiniteQuery({
         queryKey: ['activities'],
         queryFn: ({pageParam}) => fetchPage(pageParam),
         getNextPageParam: (lastPage, pages) => {
@@ -30,5 +30,12 @@ export const useActivities =() =>{
           refetchOnWindowFocus:true,
           // refetchInterval:10000,
         });
+
+        const activities = queryResult.data?.pages.flatMap((page)=>page.items);
+
+        return {
+          ...queryResult,
+          activities,
+        }
   
 }

@@ -1,5 +1,6 @@
 import { Post } from '@/app/models/post';
 import { formatDistanceToNow } from 'date-fns';
+import { MessageSquare } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardTitle } from './ui/card';
@@ -10,7 +11,7 @@ interface cardRecuringProps {
   posts:Post[],
   textAreaRef: React.MutableRefObject<{ [key: number]: HTMLTextAreaElement | null }>;
   scrollToRef: React.MutableRefObject<{ [key: number]: HTMLElement | null }>;
-  onSubmitPost: (postRef:HTMLTextAreaElement,parentPostId?:any) => void;
+  onSubmitPost: (postRef:HTMLTextAreaElement,postsToScrollTo:Post[],parentPostId?:any) => void;
   className?:string,
 }
 
@@ -19,7 +20,7 @@ interface cardRecuringProps {
 const CardRecuring: React.FC<cardRecuringProps> = ({className,post,posts,textAreaRef,scrollToRef,onSubmitPost}:cardRecuringProps) => {
     const replies = posts.filter(reply => reply.parentPostId === post.id);
     const [replyState, setReplyState] = useState<boolean>(false);
-    const defaultStyle = "p-2";
+    const defaultStyle = "p-2 border-none";
     const newStyle = `${defaultStyle} ${className}`
     const formattedText = post.content.split('\n').map((line, index) => (
         <React.Fragment key={index}>
@@ -31,7 +32,7 @@ const CardRecuring: React.FC<cardRecuringProps> = ({className,post,posts,textAre
       const handleSubmit = (postId: number,) => {
         const postRef = textAreaRef.current[postId];
         if (postRef) {
-          onSubmitPost(postRef, postId);
+          onSubmitPost(postRef,posts, postId);
         } else {
           console.error('Textarea reference is null');
         }
@@ -39,27 +40,27 @@ const CardRecuring: React.FC<cardRecuringProps> = ({className,post,posts,textAre
 
       
   return (
-    <div className="w-full max-h-[100%] flex flex-col items-center mt-4 gap-6">
+    <div className="w-full max-h-[100%] flex flex-col items-center gap-6">
     
-                <div className="max-w-[90%] lg:max-w-screen-md w-full flex flex-col"  ref=
+                <div className="max-w-[100%] lg:max-w-screen-md w-full flex flex-col"  ref=
                 {el => {
                   if (scrollToRef !=null){
                     (scrollToRef.current[post.id] = el)}} 
                   }
                 key={post.id}>
                   <Card className={newStyle}>
-                    <div className='flex'>
+                    <div className='flex '>
                     <CardTitle className="text-sm mb-1">{post.creatorDisplayName}</CardTitle>
-                    <CardDescription className='ml-2 text-sm'>{formatDistanceToNow(new Date(post.date), {addSuffix: true })}</CardDescription>
+                    <CardDescription className='ml-2 text-sm '>{formatDistanceToNow(new Date(post.date), {addSuffix: true })}</CardDescription>
                     </div>
-                    <CardContent className="text-lg max-w-[780px] p-0 leading-5 mb-2">
+                    <CardContent className="text-lg max-w-[780px] p-0 pt-2 leading-5 mb-2">
                     <p className="break-all break-words overflow-x-auto">{formattedText}</p>
                     </CardContent>
                     
                     <div className="flex flex-col">
                         {!replyState ? 
                         (
-                            <Button className='w-20' onClick={()=>setReplyState(true)}>Reply</Button>
+                            <Button className='w-24 flex items-center space-x-2 ' onClick={()=>setReplyState(true)}><MessageSquare className="h-5 w-5" /> <span className='text-sm'>Reply</span></Button>
                         )
                         :
                         (
