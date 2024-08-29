@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Activities;
+using Application.Auth;
 using Application.Core;
 using Application.Interfaces;
 using Domain;
@@ -22,13 +23,6 @@ namespace API.Extensions
         {
             Services.AddEndpointsApiExplorer();
             Services.AddSwaggerGen();
-            Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAny", policy =>
-                {
-                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-                });
-            });
             Services.AddMediatR(typeof(List.Handler).Assembly);
             Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             Services.AddScoped<IUserAccesor, UserAccesor>();

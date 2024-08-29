@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import agent from "@/utils/agent";
+import { convertUTCDateToLocalDate } from "@/utils/convertUTCDateToLocalDate";
 import { onDelete, onJoin, onLeave, onSubmit } from "@/utils/crudUtils";
 import { useLoading } from "@/utils/LoadingContext";
 import { useScrollTo } from "@/utils/scrollTo";
@@ -74,7 +75,7 @@ export default function Page({params}:activityIdInterface) {
   const { loadingStates, setLoadingState } = useLoading();
 
     
-  const { isPending, isError, data, error } = useQuery({
+  const { isPending, isError, data, error, refetch:refetchSpecificActivity } = useQuery({
     queryKey: [`activity/${params.activityId}`],
     queryFn: ()=>fetchActivity(params.activityId),
     refetchOnMount:false,
@@ -86,7 +87,9 @@ export default function Page({params}:activityIdInterface) {
   const onSubmitPost = async (postRef:HTMLTextAreaElement,postsToScrollTo:Post[],parentPostId?:any) =>{
     if (postRef){
       const textAreaValue = postRef.value;
+      console.log(new Date(Date.now()).toISOString());
     const post = {
+      "Date":new Date(Date.now()),
       "Content":textAreaValue,
       "CreatorId":user?.id,
       "CreatorDisplayName":user?.displayName,
@@ -94,11 +97,13 @@ export default function Page({params}:activityIdInterface) {
       "ParentPostId":parentPostId ? parentPostId : null
     }
     try{
-      const res = await axios.post(`http://localhost:5039/api/Posts`,post)
+      const res = await agent.requests.post(`http://localhost:5039/api/Posts`,post)
       refetchPost();
+      toast.success("Posted Succesfully");
       try{
         const posts = await agent.requests.get(`http://localhost:5039/api/Posts/${params.activityId}`) as Post[];
       setPosts(posts);
+
       }
       catch(error){
         console.log(error);
@@ -114,10 +119,6 @@ export default function Page({params}:activityIdInterface) {
         }
       }
 
-      
-
-      
-      toast.success("Posted Succesfully");
     }catch(error){
       console.log(error);
     }
@@ -245,7 +246,6 @@ useEffect(()=>{
     </div>) 
   }
 
-  if (user == null) return <LoadingSpinner></LoadingSpinner>
 
   if (posts == null) return <LoadingSpinner></LoadingSpinner>
 
@@ -256,9 +256,12 @@ useEffect(()=>{
 
  
   const isAttending = userAttendance?.find((elem) => elem.activityId === data.id);
-  const isCreator = user.id === data.creatorId;
+  const isCreator = user?.id === data.creatorId;
   const isLoading = loadingStates[data.id] || false;
   const topLevelPosts = posts.filter((elem)=>elem.parentPostId === null);
+
+  const formatedDate = convertUTCDateToLocalDate(new Date(data.date));
+
   return (
     <div className="w-full max-h-[100%] flex flex-col items-center mt-4">
       <div className="flex  lg:max-w-[824px] lg:mr-14 w-full max-w-[90%]">
@@ -267,7 +270,7 @@ useEffect(()=>{
     <Card className="flex flex-col  rounded-md pb-2 mb-2" >
           <CardHeader>
             <CardTitle>{data.title}</CardTitle>
-            <CardDescription>{formatDistanceToNow(new Date(data.date), {addSuffix: true })}</CardDescription>
+            <CardDescription>{formatDistanceToNow(new Date(formatedDate), {addSuffix: true })}</CardDescription>
           </CardHeader>
           <CardContent>
             <p>{data.description}</p>
@@ -286,7 +289,7 @@ useEffect(()=>{
         </div>}
           <div className="flex justify-end gap-3  md:justify-end">
           {!isCreator && isAttending ? 
-          isLoading || userAttendance == null ? 
+          isLoading  ? 
           (
             <LoadingSpinner className="h-[2.5rem] w-20"></LoadingSpinner>
           )
@@ -294,8 +297,8 @@ useEffect(()=>{
           (
           <Button className="bg-red-600 hover:bg-red-700 w-20 " onClick={()=>onLeave(params.activityId,user,setLoadingState)}>Leave</Button>
           )
-          : !isCreator && !isAttending ?
-          isLoading || userAttendance == null ?
+          : !isCreator && !isAttending && userAttendance !=null ?
+          isLoading  ?
           (
           <LoadingSpinner className="h-[2.5rem] w-20"></LoadingSpinner>
           )
@@ -314,7 +317,7 @@ useEffect(()=>{
             >
             <DialogTrigger><Button className="bg-blue-600 hover:bg-blue-700 w-20">Edit</Button></DialogTrigger>
             <DialogContent className=" w-full  h-fit overflow-auto lg:max-h-screen max-h-[85vh]  max-w-[85vw] lg:max-w-[32rem]">
-              <ActivityForm className="p-4 rounded-md" setOpen={setOpenDialogId} onSubmitFnc={onSubmit} givenActivity={data}/>
+              <ActivityForm className="p-4 rounded-md" setOpen={setOpenDialogId} onSubmitFnc={onSubmit} givenActivity={data} refetch={refetchSpecificActivity}/>
             </DialogContent>
           </Dialog>
           ) }
@@ -339,7 +342,7 @@ useEffect(()=>{
                     }} className="" placeholder="Type your thoughts here." onFocus={()=>{setIsFocused(true)}} /> 
                     {isFocused && (
                         <div>
-                            <Button className="place-self-center mt-2 mr-2" onClick={()=>onSubmitPost(textAreaRef.current[data.id],data)}>Comment</Button>
+                            <Button className="place-self-center mt-2 mr-2" onClick={()=>onSubmitPost(textAreaRef.current[data.id],posts)}>Comment</Button>
                             <Button className='w-20 bg-red-600 hover:bg-red-700' onClick={()=>setIsFocused(false)}>Cancel</Button>
                         </div>
                     )

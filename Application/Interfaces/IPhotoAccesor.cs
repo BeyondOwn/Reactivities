@@ -11,6 +11,8 @@ namespace Application.Interfaces
     {
         Task<PhotoUploadResults> AddPhoto(IFormFile file);
 
+        Task<PhotoUploadResults> UploadImageFromUrlAsync(string imageUrl, string publicId);
+
         Task<string> DeletePhoto(string publicId);
 
     }

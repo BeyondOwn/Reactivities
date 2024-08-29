@@ -12,7 +12,7 @@ using Persistence;
 
 namespace Application.Photos
 {
-    public class Add
+    public class AddProfilePhoto
     {
         public class Command : IRequest<Result<Photo>>
         {

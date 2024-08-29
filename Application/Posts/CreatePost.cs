@@ -53,7 +53,7 @@ namespace Application.Activities
                 //     CreatorDisplayName = request.ActivityPosts.CreatorDisplayName
                 // };
 
-                request.ActivityPosts.Date = DateTime.Now;
+
                 _context.ActivityPosts.Add(request.ActivityPosts);
 
                 var result = await _context.SaveChangesAsync() > 0;

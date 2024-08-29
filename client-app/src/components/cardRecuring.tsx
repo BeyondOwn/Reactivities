@@ -1,4 +1,5 @@
 import { Post } from '@/app/models/post';
+import { convertUTCDateToLocalDate } from '@/utils/convertUTCDateToLocalDate';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare } from 'lucide-react';
 import React, { useState } from 'react';
@@ -22,6 +23,7 @@ const CardRecuring: React.FC<cardRecuringProps> = ({className,post,posts,textAre
     const [replyState, setReplyState] = useState<boolean>(false);
     const defaultStyle = "p-2 border-none";
     const newStyle = `${defaultStyle} ${className}`
+    const formatedDate = convertUTCDateToLocalDate(new Date(post.date));
     const formattedText = post.content.split('\n').map((line, index) => (
         <React.Fragment key={index}>
           {line}
@@ -32,7 +34,7 @@ const CardRecuring: React.FC<cardRecuringProps> = ({className,post,posts,textAre
       const handleSubmit = (postId: number,) => {
         const postRef = textAreaRef.current[postId];
         if (postRef) {
-          onSubmitPost(postRef,posts, postId);
+          onSubmitPost(postRef,replies, postId);
         } else {
           console.error('Textarea reference is null');
         }
@@ -51,7 +53,7 @@ const CardRecuring: React.FC<cardRecuringProps> = ({className,post,posts,textAre
                   <Card className={newStyle}>
                     <div className='flex '>
                     <CardTitle className="text-sm mb-1">{post.creatorDisplayName}</CardTitle>
-                    <CardDescription className='ml-2 text-sm '>{formatDistanceToNow(new Date(post.date), {addSuffix: true })}</CardDescription>
+                    <CardDescription className='ml-2 text-sm '>{formatDistanceToNow(new Date(formatedDate), {addSuffix: true })}</CardDescription>
                     </div>
                     <CardContent className="text-lg max-w-[780px] p-0 pt-2 leading-5 mb-2">
                     <p className="break-all break-words overflow-x-auto">{formattedText}</p>

@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Services;
 using Domain;
+using Google.Apis.Auth;
+using MediatR;
+using Application.Core;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +22,14 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
+        private readonly IConfiguration _config;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly TokenService _tokenService;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, TokenService tokenService)
+        public AccountController(IConfiguration config, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, TokenService tokenService)
         {
+            _config = config;
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
@@ -83,6 +89,26 @@ namespace API.Controllers
 
             return BadRequest("Couldn't register user");
         }
+
+
+        private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string token)
+        {
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { _config["Google:ClientId"] }
+            };
+
+            try
+            {
+                var payload = await GoogleJsonWebSignature.ValidateAsync(token, settings);
+                return payload;
+            }
+            catch (InvalidJwtException)
+            {
+                return null;
+            }
+        }
+
         [Authorize]
         [HttpGet]
         public async Task<ActionResult<UserDto>> GetCurrentUser()

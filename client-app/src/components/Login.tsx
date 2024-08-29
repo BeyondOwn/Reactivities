@@ -1,10 +1,5 @@
 'use client'
-import { Button, buttonVariants } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger
-} from "@/components/ui/dialog"
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -14,7 +9,6 @@ import {
   FormMessage
 } from "@/components/ui/form"
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { FC } from 'react'
@@ -45,32 +39,23 @@ const Login: FC<pageProps> = ({onSubmitFnc,className}:pageProps) => {
         onSubmitFnc(values);
       };
 
-      const defaultStyles = 'border-2 bg-card text-card-foreground';
+      const defaultStyles = 'space-y-8';
       const combinedStyles = `${defaultStyles} ${className || ''}`;
 
   return <div>
-    <Dialog>
-  <DialogTrigger className={cn(
-            buttonVariants({ variant: 'default' }),
-            'self-start -mt-20'
-          )}>
-    Login
-    </DialogTrigger>
-  <DialogContent className={combinedStyles}>
-    
   <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className={combinedStyles}>
 
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className='font-semibold'>Email</FormLabel>
               <FormControl>
                 <Input placeholder="shadcn" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className='font-semibold' />
             </FormItem>
           )}
         />
@@ -80,23 +65,22 @@ const Login: FC<pageProps> = ({onSubmitFnc,className}:pageProps) => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className='font-semibold'>Password</FormLabel>
               <FormControl>
-                <Input type='password' placeholder="shadcn" {...field} />
+                <Input  type='password' placeholder="shadcn" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage className='font-semibold' />
             </FormItem>
           )}
         />
 
 
 
-        <Button type="submit">Submit</Button>
+        <Button className='rounded-full font-semibold ' type="submit">Login</Button>
       </form>
     </Form>
 
-  </DialogContent>
-</Dialog>
+ 
    
   </div>
 }

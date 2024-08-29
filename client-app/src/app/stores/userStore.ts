@@ -5,7 +5,7 @@ import { useCommonStore } from "./commonStore";
 
 interface userstoreProps{
     user:User | null,
-    setUser:(user:User)=>void,
+    setUser:(user:User|null)=>void,
     login: (creds:LoginFormValues) => void,
     logout:()=>void
     LoggingIn:(user:User)=>void
@@ -21,7 +21,7 @@ export const useUserStore = create<userstoreProps>((set) => ({
         set((state) => ({isLoggedIn:true}))
     },
     isLoggedIn:false,
-    setUser: (user:User) => {
+    setUser: (user:User|null) => {
         set((state) => ({user:user}))
     },
     getUser: async () =>{
@@ -45,6 +45,8 @@ export const useUserStore = create<userstoreProps>((set) => ({
     logout:()=>{
         useCommonStore.setState((state)=> ({token:null}))
         window.localStorage.removeItem('jwt');
+        const setUser = useUserStore.getState().setUser;
+        setUser(null);
         useUserStore.setState((state)=> ({user:null}))
         window.location.href="/"
     },

@@ -24,6 +24,52 @@ namespace Infrastructure.Photos
             _cloudinary = new Cloudinary(account);
         }
 
+        public async Task<PhotoUploadResults> UploadImageFromUrlAsync(string imageUrl, string publicId)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                // Download the image from the URL
+                var imageBytes = await httpClient.GetByteArrayAsync(imageUrl);
+
+                // Create an upload stream from the image bytes
+                using (var stream = new MemoryStream(imageBytes))
+                {
+                    var uploadParams = new ImageUploadParams
+                    {
+                        File = new FileDescription(publicId, stream),
+                    };
+
+                    //     var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+                    // if (uploadResult.Error != null)
+                    // {
+                    //     throw new Exception(uploadResult.Error.Message);
+                    // }
+
+                    // return new PhotoUploadResults
+                    // {
+                    //     PublicId = uploadResult.PublicId,
+                    //     Url = uploadResult.SecureUrl.ToString(),
+                    // };
+
+                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+                    if (uploadResult.Error != null)
+                    {
+                        throw new Exception(uploadResult.Error.Message);
+                    }
+
+                    return new PhotoUploadResults
+                    {
+                        PublicId = uploadResult.PublicId,
+                        Url = uploadResult.SecureUrl.ToString(),
+                    };
+
+                    // return uploadResult.SecureUrl.ToString(); // Return the URL of the uploaded image
+                }
+            }
+        }
+
         public async Task<PhotoUploadResults> AddPhoto(IFormFile file)
         {
             if (file.Length > 0)

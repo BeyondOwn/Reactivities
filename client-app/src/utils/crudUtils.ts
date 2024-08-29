@@ -48,13 +48,13 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
           setActivityAttendance(activityAttendancePrev);
         }
         setLoadingState(activityId, false);
-        toast.success("You joined the activity");
         try{
           await agent.requests.post(`http://localhost:5039/api/ActivityAttendance/`,{
             userId:user?.id,
             activityId:activityId,
             displayName:user?.displayName
           })
+          toast.success("You joined the activity");
         }
         catch(error){
           userAttendancePrev?.pop();
@@ -134,7 +134,6 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
           }
           // setUserAttendanceUpdated(userAttendanceUpdated);
         }
-        toast.info("You left the activity");
          setLoadingState(activityId, false); // Start loading
       try{
         await agent.requests.del(`http://localhost:5039/api/ActivityAttendance/`,{
@@ -147,6 +146,7 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
           }
         }
       )
+      toast.info("You left the activity");
       }
       catch(error){
         if (indexToRemove !=undefined){
@@ -194,21 +194,19 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
   //  window.location.reload();
   }
 
-  export async function onSubmit(values: z.infer<typeof formSchema>,router:any,refetch:any,setOpen:Dispatch<SetStateAction<number|null>>,id?:number) {
+  export async function onSubmit(values: z.infer<typeof formSchema>,router:any,refetch:any,setOpen?:Dispatch<SetStateAction<number|null>>,id?:number) {
     try{
      await agent.requests.put(`http://localhost:5039/api/Activities/edit/id?id=${id}`,values)
-     if(window.location.href.includes("/activity/")){
-      refetch();
-      router.push("/");
-    }
-      else{
-          refetch();
-          setOpen(null);
       }
-      toast.info(`Edited activity id:${id}`);
-    } 
     catch(error){
      console.log(error);
+    }
+    finally{
+      refetch();
+      if (setOpen){
+        setOpen(null);
+      }
+      toast.info(`Edited activity id:${id}`);
     }
      
    }

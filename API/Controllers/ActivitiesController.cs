@@ -17,12 +17,13 @@ namespace API.Controllers
         //     return HandleResult(result);
         // }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetActivity(int id)
         {
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
         }
-
+        [AllowAnonymous]
         [HttpGet("/view/{pageNumber}")]
         public async Task<IActionResult> GetActivities(int pageNumber)
         {

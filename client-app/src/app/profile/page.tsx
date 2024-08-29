@@ -143,20 +143,20 @@ const Page: FC<pageProps> = () => {
  
 
   return <div className='w-full max-h-[100%] flex flex-col items-center'>
-   <div className='bg-card p-4 mt-4 flex flex-col items-center lg:w-[80%] w-[60%] min-h-[54rem] lg:min-h-[22rem]'>
+   <div className='bg-card p-4 mt-4 flex flex-col flex-grow items-center  w-[80%]  min-h-[54rem] lg:min-h-[22rem]'>
     <div className='flex gap-2 place-self-start'>
     <ImageIcon className='h-7 w-7'/>
     <span className='font-semibold text-xl '>Photos</span>
     </div>
    
-    <div className='grid lg:grid-cols-3 items-center gap-14 '>
+    <div className='grid lg:grid-cols-3 place-items-center items-center  gap-14 w-[100%] '>
     
-    <div className='flex flex-col col-span-1 gap-1 max-h-[200px] max-w-[200px]'>
+    <div className='flex flex-col col-span-1 gap-1 max-h-[200px] flex-grow'>
     <span className='font-semibold text-lg'>Step 1 - Add Photo</span>
     <PhotoDropzone className='flex flex-col ' setFiles={setFiles}/>
     </div>
     
-    <div className='max-h-[200px] max-w-[200px]'>
+    <div className='max-h-[200px] flex-grow'>
     <span className='font-semibold text-lg'>Step 2 - Resize Image</span>
     <div className='min-h-[200px] w-[205px] gap-1 border-2 border-primary'>
     {files && files.length > 0 && (
@@ -165,11 +165,11 @@ const Page: FC<pageProps> = () => {
     </div>
     </div>
 
-    <div className='max-h-[200px] max-w-[240px] gap-1 '>
+    <div className='max-h-[200px]  flex-grow gap-1 '>
     <span className='font-semibold text-lg'>Step 3 - Preview & Upload</span>
    
-      <div ref={previewRef} className='img-preview min-h-[200px] overflow-hidden w-[200px] border-2 border-primary'></div>
-      <div className='flex py-2 max-w-[200px] rounded-sm'>
+      <div ref={previewRef} className='img-preview min-h-[200px] overflow-hidden  border-2 border-primary'></div>
+      <div className='flex py-2 flex-grow rounded-sm'>
         {cropperLoading ? (<LoadingSpinner className='w-[50%]'/>)
         :(
           <Button onClick={()=>onCrop(refetch,setLoadingState)} className='w-[50%] bg-green-600 hover:bg-green-700'><Check/></Button>
@@ -177,7 +177,7 @@ const Page: FC<pageProps> = () => {
     
     <Button onClick={()=> {
       setFiles([]);
-      // previewRef?.current?.querySelector('img')?.remove();
+      previewRef?.current?.querySelector('img')?.remove();
       }} className='w-[50%] bg-gray-500 hover:bg-gray-600'><X/></Button>
     </div>
     </div>
@@ -187,7 +187,7 @@ const Page: FC<pageProps> = () => {
     
   </div>
 
-  <div className='flex flex-col bg-card mt-4 px-4 min-h-[20rem] w-[60%] lg:w-[80%]'>
+  <div className='flex flex-col bg-card mt-4 px-4 min-h-[20rem] w-[80%]'>
     <span className='place-self-start  font-semibold text-xl  py-2 px-5'>Set Main Photo - Click Any</span>
     {data ? 
     (

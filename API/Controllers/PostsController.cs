@@ -11,12 +11,13 @@ namespace API.Controllers
 {
     public class PostsController : BaseApiController
     {
+        [AllowAnonymous]
         [HttpGet("{ActivityId}")]
         public async Task<IActionResult> GetActivity(int activityId)
         {
             return HandleResult(await Mediator.Send(new GetPostsForActivity.Query { ActivityId = activityId }));
         }
-
+        [AllowAnonymous]
         [HttpGet("infinite/{activityId}/{pageNumber}")]
         public async Task<IActionResult> GetActivities(int pageNumber, int activityId)
         {

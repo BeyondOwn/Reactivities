@@ -8,9 +8,9 @@ import { useUser } from "@/utils/UserContext";
 export default function DisplayActivities() {
 
   const {user} = useUser();
-  if (user == undefined){
-    throw new Error("user undefined");
-  }
+  // if (user == undefined){
+  //   throw new Error("user undefined");
+  // }
   
 
   return (

@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { useActivities } from "@/utils/useActivities"
 import { useUser } from "@/utils/UserContext"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
@@ -30,8 +29,9 @@ import { z } from "zod"
 interface ActivityFormProps {
   className?:string
   givenActivity?: Activity
-  onSubmitFnc: (values: z.infer<typeof formSchema>,router:any,refetch:any,setOpen:Dispatch<SetStateAction<number | null>>,id?: number) => Promise<void>,
-  setOpen:Dispatch<SetStateAction<number | null>>
+  onSubmitFnc: (values: z.infer<typeof formSchema>,router:any,refetch?:any,setOpen?:Dispatch<SetStateAction<number | null>>,id?: number) => Promise<void>,
+  setOpen?:Dispatch<SetStateAction<number | null>>,
+  refetch?:any,
 }
 
 const formSchema = z.object({
@@ -56,10 +56,11 @@ const formSchema = z.object({
     // })
   })
 
-const ActivityForm: FC<ActivityFormProps> = ({className,givenActivity,onSubmitFnc,setOpen}:ActivityFormProps) => {
+const ActivityForm: FC<ActivityFormProps> = ({className,givenActivity,onSubmitFnc,setOpen,refetch}:ActivityFormProps) => {
     const [date, setDate] = useState<Date>()
     const {error,loading,user} = useUser();
-    const refetch = useActivities().refetch;
+   
+  
     const router = useRouter();
 
     console.log(givenActivity);

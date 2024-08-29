@@ -16,6 +16,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import agent from "@/utils/agent";
+import { convertUTCDateToLocalDate } from "@/utils/convertUTCDateToLocalDate";
 import { onDelete, onJoin, onLeave, onSubmit, onView } from "@/utils/crudUtils";
 import { useLoading } from "@/utils/LoadingContext";
 import { useActivities } from "@/utils/useActivities";
@@ -170,22 +171,22 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
   }
 
   // if (userAttendance == null) return <LoadingSpinner></LoadingSpinner>
-  if (user == null) return <LoadingSpinner></LoadingSpinner>
+  // if (user == null) return <LoadingSpinner></LoadingSpinner>
   
   return (
     <>
     {activitiesFromHook?.map((todo,index) => {
       const isAttending = userAttendance?.find((elem) => elem.activityId === todo.id);
-      const isCreator = user.id === todo.creatorId;
+      const isCreator = user?.id === todo.creatorId;
       const activityAttendancePersonalized = activityAttendance?.filter((elem)=> elem.activityId === todo.id)
       const isLoading = loadingStates[todo.id] || false;
-      
+      const formatedDate = convertUTCDateToLocalDate(new Date(todo.date));
       return (
         <div className="max-w-[90%] lg:max-w-screen-md w-full flex flex-col" key={todo.id.toString()}>
           <Card className="flex flex-col rounded-md p-4 bg-card" >
           <CardHeader>
             <CardTitle>{todo.title}</CardTitle>
-            <CardDescription>{formatDistanceToNow(new Date(todo.date), {addSuffix: true })}</CardDescription>
+            <CardDescription>{formatDistanceToNow(new Date(formatedDate), {addSuffix: true })}</CardDescription>
             <CardDescription className="text-primary font-semibold">Created by {todo.creatorDisplayName}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -205,7 +206,7 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
         </div>}
           <div className="flex justify-end gap-3  md:justify-end">
           {!isCreator && isAttending ? 
-          isLoading || userAttendance == null ? 
+          isLoading ? 
           (
             <LoadingSpinner className="h-[2.5rem] w-20"></LoadingSpinner>
           )
@@ -213,8 +214,8 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
           (
           <Button className="bg-red-600 hover:bg-red-700 w-20 " onClick={()=>onLeave(todo.id,user,setLoadingState)}>Leave</Button>
           )
-          : !isCreator && !isAttending ?
-          isLoading || userAttendance == null ?
+          : !isCreator && !isAttending && userAttendance !=null ?
+          isLoading  ?
           (
           <LoadingSpinner className="h-[2.5rem] w-20"></LoadingSpinner>
           )
@@ -233,7 +234,7 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
             >
             <DialogTrigger><Button className="bg-blue-600 hover:bg-blue-700 w-20">Edit</Button></DialogTrigger>
             <DialogContent className=" w-full  h-fit overflow-auto lg:max-h-screen max-h-[85vh]  max-w-[85vw] lg:max-w-[32rem]">
-              <ActivityForm className="p-4 rounded-md" setOpen={setOpenDialogId} onSubmitFnc={onSubmit} givenActivity={todo}/>
+              <ActivityForm className="p-4 rounded-md" setOpen={setOpenDialogId} onSubmitFnc={onSubmit} givenActivity={todo} refetch={refetch}/>
             </DialogContent>
           </Dialog>
           ) }

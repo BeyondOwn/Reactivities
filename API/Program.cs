@@ -34,6 +34,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<Create>();
 
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAny", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();
@@ -63,7 +70,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors(AllowAny);
+app.UseCors("AllowAny");
 
 app.UseAuthentication();
 

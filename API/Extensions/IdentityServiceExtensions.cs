@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using API.Services;
+using Application.Auth;
 using Domain;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -35,8 +37,14 @@ namespace API.Extensions
                         ValidateIssuer = false,
                         ValidateAudience = false,
                     };
+                })
+                .AddGoogle(googleOptions =>
+                {
+                    googleOptions.ClientId = config["Google:ClientId"];
+                    googleOptions.ClientSecret = config["Google:ClientSecret"];
                 });
             services.AddScoped<TokenService>();
+            services.AddScoped<TokenServiceInfra>();
 
             return services;
         }

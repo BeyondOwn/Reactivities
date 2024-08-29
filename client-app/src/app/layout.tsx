@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { LoadingProvider } from "@/utils/LoadingContext";
 import ReactQueryProvider from "@/utils/ReactQueryProvider";
 import { UserProvider } from "@/utils/UserContext";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import { Bounce, ToastContainer } from "react-toastify";
@@ -35,6 +36,7 @@ export default function RootLayout({
           fontSans.variable
         )}>
            <LoadingProvider>
+            <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID!}>
           <UserProvider>
           <ThemeProvider
             attribute="class"
@@ -59,6 +61,7 @@ export default function RootLayout({
         </ReactQueryProvider>
         </ThemeProvider>
         </UserProvider>
+        </GoogleOAuthProvider>
         </LoadingProvider>
         </body>
     </html>
