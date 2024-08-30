@@ -324,7 +324,7 @@ useEffect(()=>{
           {isCreator && (
             <Button className="bg-red-600 hover:bg-red-700 w-20" onClick={()=>onDelete(params.activityId,refetch,router)}>Delete</Button>
           )}
-
+          <Button className="bg-purple-600 hover:bg-purple-700 w-20" onClick={()=>router.push(`${params.activityId}/chatroom`)}>ChatRoom</Button>
           </div>
 
           

@@ -14,11 +14,20 @@ namespace API.Controllers
     {
         //Google
         [AllowAnonymous]
-        [HttpPost("signin-google")]
-        public async Task<IActionResult> GoogleSignIn([FromBody] GoogleSignInRequest request)
+        [HttpPost("signin-google/onetap")]
+        public async Task<IActionResult> GoogleSignInOneTap([FromBody] GoogleTokenRequest request)
         {
 
-            return HandleResult(await Mediator.Send(new GoogleAuth.Command { AccessToken = request.AccessToken }));
+            return HandleResult(await Mediator.Send(new GoogleAuthOneTap.Command { Credential = request.Credential }));
+
+        }
+
+        [AllowAnonymous]
+        [HttpPost("signin-google/custom")]
+        public async Task<IActionResult> GoogleSignInCustom([FromBody] GoogleSignInRequest request)
+        {
+
+            return HandleResult(await Mediator.Send(new GoogleAuthCustom.Command { AccesToken = request.AccessToken }));
 
         }
     }

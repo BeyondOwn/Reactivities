@@ -8,7 +8,7 @@ interface ActivitiesProps{
   user: User,
 }
 
-async function fetchPage(pageParam:number): Promise<paginatedResults<Activity>> {
+export async function fetchPage(pageParam:number): Promise<paginatedResults<Activity>> {
     const result = await agent.requests.get<paginatedResults<Activity>>(`http://localhost:5039/view/${pageParam}`)
     // console.log(result.data)
     return result;

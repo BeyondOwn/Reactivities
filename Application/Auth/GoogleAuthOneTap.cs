@@ -20,11 +20,11 @@ using Persistence;
 
 namespace Application.Auth
 {
-    public class GoogleAuth
+    public class GoogleAuthOneTap
     {
         public class Command : IRequest<Result<UserDto>>
         {
-            public string AccessToken { get; set; }
+            public string Credential { get; set; }
         }
 
         public class Handler : IRequestHandler<Command, Result<UserDto>>
@@ -51,7 +51,7 @@ namespace Application.Auth
 
             public async Task<Result<UserDto>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var payload = await GetGoogleUserInfo(request.AccessToken);
+                var payload = await ValidateGoogleToken(request.Credential);
 
                 if (payload == null)
                 {
@@ -78,7 +78,7 @@ namespace Application.Auth
                     // You might want to create a new user in your database
                     user = new AppUser
                     {
-                        UserName = name,
+                        UserName = name.ToString().Trim().ToLower().Replace(" ", ""),
                         Email = email,
                         DisplayName = name,
                         Bio = "empty",

@@ -5,30 +5,32 @@
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class TextColumType : Migration
+    public partial class Ibeg : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Content",
-                table: "ActivityPosts",
-                type: "TEXT",
+                name: "AuthorId",
+                table: "ChatAppComments",
+                type: "nvarchar(450)",
                 nullable: false,
+                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "nvarchar(450)",
+                oldNullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Content",
-                table: "ActivityPosts",
-                type: "nvarchar(max)",
-                nullable: false,
+                name: "AuthorId",
+                table: "ChatAppComments",
+                type: "nvarchar(450)",
+                nullable: true,
                 oldClrType: typeof(string),
-                oldType: "TEXT");
+                oldType: "nvarchar(450)");
         }
     }
 }

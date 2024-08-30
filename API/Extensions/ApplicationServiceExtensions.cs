@@ -26,6 +26,7 @@ namespace API.Extensions
             Services.AddMediatR(typeof(List.Handler).Assembly);
             Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             Services.AddScoped<IUserAccesor, UserAccesor>();
+            Services.AddSignalR();
             Services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));

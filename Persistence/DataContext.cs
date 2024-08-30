@@ -16,6 +16,8 @@ namespace Persistence
 
         public DbSet<ActivityPosts> ActivityPosts { get; set; }
         public DbSet<Photo> Photos { get; set; }
+
+        public DbSet<ChatAppComment> ChatAppComments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -90,6 +92,16 @@ namespace Persistence
             .WithMany(a => a.UserActivities)
             .HasForeignKey(u => u.ActivityId)
             .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ChatAppComment>()
+               .HasOne(a => a.Activity)
+               .WithMany(c => c.ChatAppComments)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChatAppComment>()
+               .HasOne(a => a.Author)
+               .WithMany(c => c.chatAppComments)
+               .OnDelete(DeleteBehavior.NoAction);
 
         }
 

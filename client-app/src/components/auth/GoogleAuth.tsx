@@ -34,46 +34,47 @@ const handleLoginSuccess = async (response: any) => {
     console.error('Login Failed:', error);
   };
   
-   const GoogleAuth = () => {
-    const login = useGoogleLogin({
-      onSuccess: async (tokenResponse) => {
-        // Check if all required scopes are granted
-        const hasAccess = hasGrantedAllScopesGoogle(
-          tokenResponse,
-          'https://www.googleapis.com/auth/userinfo.email',
-          'https://www.googleapis.com/auth/userinfo.profile'
-        );
+    const GoogleAuth = () => {
+      const login = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+          // Check if all required scopes are granted
+          const hasAccess = hasGrantedAllScopesGoogle(
+            tokenResponse,
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile'
+          );
   
-        if (!hasAccess) {
-          console.error('Required scopes not granted.');
-          return;
-        }
+          if (!hasAccess) {
+            console.error('Required scopes not granted.');
+            return;
+          }
   
-        // Proceed with your logic, for example, sending the token to your backend
-        try {
-          console.log(tokenResponse)
-          const data = {
-            AccessToken: tokenResponse.access_token
-          };
-          const result = await axios.post('http://localhost:5039/api/OAuth/signin-google',data );
-          console.log('Success:', result.data);
-          const userInfo = result.data as User;
-
-          const setToken = useCommonStore.getState().setToken;
-          useUserStore.setState({user:userInfo})
-          setToken(userInfo.token)
-          const LoggingIn = useUserStore.getState().LoggingIn;
-          LoggingIn(userInfo);
-          window.location.href="/"
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      },
-      onError: (error) => {
-        console.error('Login Failed:', error);
-      },
-      scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', // This might work here if not in the other component
-    });
+          // Proceed with your logic, for example, sending the token to your backend
+          try {
+            console.log(tokenResponse)
+            const data = {
+              AccessToken: tokenResponse.access_token
+            };
+            const result = await axios.post('http://localhost:5039/api/OAuth/signin-google/custom',data );
+            console.log('Success:', result.data);
+            const userInfo = result.data as User;
+  
+            const setToken = useCommonStore.getState().setToken;
+            const setUser = useUserStore.getState().setUser;
+            setUser(userInfo);
+            setToken(userInfo.token)
+            const LoggingIn = useUserStore.getState().LoggingIn;
+            LoggingIn(userInfo);
+            window.location.href="/"
+          } catch (error) {
+            console.error('Error:', error);
+          }
+        },
+        onError: (error) => {
+          console.error('Login Failed:', error);
+        },
+        scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile', // This might work here if not in the other component
+      });
   
     return (
       <div>
@@ -89,3 +90,4 @@ const handleLoginSuccess = async (response: any) => {
   };
 
   export default GoogleAuth;
+

@@ -200,15 +200,19 @@ const Page: FC<pageProps> = () => {
           }}
         key={photo.id}>
           <DialogTrigger asChild>
-            <div className='w-[205px] h-[205px]'>
+            <div className='w-[205px] h-[230px] flex flex-col items-center'>
           <Image onClick={() => handleOpen(photo.id)} className='transition-transform duration-300 ease-out hover:scale-105 hover:border-l-4 
           hover:border-b-4 hover:border-purple-500' 
           alt='' width={200} height={200} src={photo.url}/>
+          {photo.isMain ? 
+            (
+              <span>Main Photo</span>
+            ):null}
           {/* <div className="absolute inset-0 bg-white opacity-10 z-20"></div> */}
           </div>
           
           </DialogTrigger>
-          <DialogContent className="flex flex-col items-center max-w-[80%] sm:max-w-[400px]">
+          <DialogContent className="flex flex-col items-center max-w-[80%] sm:max-w-[400px] overflow-hidden">
           {loading ? (<LoadingSpinner/>):
             (
               <>
@@ -216,14 +220,14 @@ const Page: FC<pageProps> = () => {
           <Image  alt='' width={200} height={200} src={photo.url}/>
           <DialogFooter className='flex flex-col w-[200px] sm:flex-col sm:space-x-0 '>
             <div className='flex flex-row'>
-          <Button onClick={()=>{
+          <Button disabled={photo.isMain} onClick={()=>{
             setMainPhoto(photo.id,handleClose);
           }} className='w-[50%] bg-green-600 hover:bg-green-700'>Yes</Button>
           <Button onClick={()=>{
              handleClose();
           }} className='w-[50%] bg-gray-500 hover:bg-gray-600'>No</Button>
           </div>
-          <Button onClick={()=>{
+          <Button disabled={photo.isMain} onClick={()=>{
              DeletePhoto(photo.id,handleClose,refetch);
           }} className=' w-[100%] bg-red-500 hover:bg-red-600'>Delete</Button>
         </DialogFooter></>

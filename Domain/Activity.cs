@@ -22,6 +22,7 @@ namespace Domain
         public ICollection<ActivityPosts>? ActivityPosts { get; set; }
 
         public ICollection<UserActivity>? UserActivities { get; set; } = new List<UserActivity>();
+        public ICollection<ChatAppComment>? ChatAppComments { get; set; } = new List<ChatAppComment>();
 
     }
 }

@@ -1,5 +1,6 @@
 'use client'
 import GoogleAuth from '@/components/auth/GoogleAuth';
+import GoogleAuthOneTap from '@/components/auth/GoogleAuthOneTap';
 import { Login, formSchema as LoginSchema } from '@/components/Login';
 import { formSchema as RegisterSchema } from '@/components/Register';
 import { Separator } from '@/components/ui/separator';
@@ -31,6 +32,8 @@ async function onRegister(values: z.infer<typeof RegisterSchema>) {
   }
 
 const Page: FC<pageProps> = ({}) => {
+    //GOOGLE 1 tap
+    GoogleAuthOneTap();
     const router = useRouter();
   return <div className='flex flex-col items-center justify-start min-h-[93dvh] h-full'>
     <div className=' flex flex-col items-center bg-card mt-4 sm:w-[400px] w-[90%] h-fit p-4'>
@@ -45,6 +48,7 @@ const Page: FC<pageProps> = ({}) => {
     </div>
     
     <GoogleAuth/>
+    
     </div>
   </div>
 }
