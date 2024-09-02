@@ -13,6 +13,8 @@ namespace Application.Interfaces
 
         Task<PhotoUploadResults> UploadImageFromUrlAsync(string imageUrl, string publicId);
 
+        Task<string> GetPublicIdFromUrlAsync(string imageUrl);
+
         Task<string> DeletePhoto(string publicId);
 
     }

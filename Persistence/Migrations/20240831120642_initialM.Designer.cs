@@ -12,8 +12,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240830122059_Ibeg")]
-    partial class Ibeg
+    [Migration("20240831120642_initialM")]
+    partial class initialM
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -405,7 +405,7 @@ namespace Persistence.Migrations
                         .WithMany("ActivityPosts")
                         .HasForeignKey("CreatorDisplayName")
                         .HasPrincipalKey("DisplayName")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ActivityPosts", "ParentPost")

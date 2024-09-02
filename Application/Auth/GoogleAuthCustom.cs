@@ -120,6 +120,21 @@ namespace Application.Auth
                         userDb.Photos.Add(googlePhoto);
                     }
                 }
+                // else
+                // {
+                //     if (userDb.Photos.All(x => !x.isMain))
+                //     {
+                //         var photoPublicId = await _photoAccesor.GetPublicIdFromUrlAsync(_config["DefaultProfilePic"]);
+                //         var defaultPhoto = new Photo
+                //         {
+                //             Id = photoPublicId,
+                //             Url = _config["DefaultProfilePic"],
+                //             isMain = true
+                //         };
+
+                //         userDb.Photos.Add(defaultPhoto);
+                //     }
+                // }
 
                 var result = await _context.SaveChangesAsync() > 0;
                 // if (!result) return Result<UserDto>.Failure("Issue Saving Changes");

@@ -103,5 +103,47 @@ namespace Infrastructure.Photos
             var result = await _cloudinary.DestroyAsync(deleteParams);
             return result.Result == "ok" ? result.Result : null;
         }
+
+        public async Task<string> GetPublicIdFromUrlAsync(string imageUrl)
+        {
+            var publicId = ExtractPublicIdFromUrl(imageUrl);
+
+            if (string.IsNullOrEmpty(publicId))
+            {
+                throw new ArgumentException("Invalid image URL provided.");
+            }
+
+            // Fetch details about the image
+            var resources = await _cloudinary.GetResourceAsync(publicId);
+
+            if (resources == null || resources.Error != null)
+            {
+                throw new Exception("Error retrieving resource from Cloudinary.");
+            }
+
+            // Return the public ID or any other details you need
+            return resources.PublicId;
+        }
+
+        private string ExtractPublicIdFromUrl(string url)
+        {
+            // Extract public ID from URL logic
+            // Cloudinary URLs have the format: `https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/public_id.png`
+            var uri = new Uri(url);
+            var pathSegments = uri.AbsolutePath.Split('/');
+            // Extract public ID from the path
+            // Path segments: ["/image", "/upload", "/v1234567890", "public_id.png"]
+            if (pathSegments.Length >= 4)
+            {
+                var fileName = pathSegments[pathSegments.Length - 1];
+                var versionAndId = fileName.Split('.');
+                if (versionAndId.Length >= 2)
+                {
+                    return versionAndId[0]; // Return the public ID part
+                }
+            }
+
+            return null;
+        }
     }
 }

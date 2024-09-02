@@ -1,23 +1,34 @@
+import { convertUTCDateToLocalDate } from "@/utils/convertUTCDateToLocalDate";
+import { formatDateToday } from "@/utils/formatDateToday";
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { create } from "zustand";
 import { chatComment } from "../models/chatComment";
+import { Profile } from "../models/profile";
 import { User } from "../models/user";
 
 interface chatCommentStore{
+    onlineUsers:Profile[],
     comments: chatComment[],
     hubConnection: HubConnection | null,
     createHubConnection:(activityId:string,user:User)=>void,
     stopHubConnection: () => void,
     addComment:(values:any,activityId:string)=>void,
+    getUsersInGroup:(groupName:string)=>void;
 }
 
 
 export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
+    onlineUsers:[],
     comments:[],
     hubConnection: null,
+    getUsersInGroup:async(groupName:string)=>{
+        const hubConnection = get().hubConnection;
+        if (hubConnection){
+            await hubConnection.invoke("GetUsersInGroup",groupName)
+        }
+    },
     addComment:async(values:any,activityId:string) =>{
         values.activityId = Number(activityId);
-        console.log("values: ",values);
      
             const hubConnection = get().hubConnection;
             if (hubConnection){
@@ -39,20 +50,52 @@ export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
             
             
             hubConnection.on("LoadComments",(comments:chatComment[])=>{
-                set({comments:comments})
+                const formattedComments = comments.map(comm => ({
+                    ...comm,
+                    createdAt: formatDateToday(convertUTCDateToLocalDate(new Date(comm.createdAt)).toLocaleString()),
+                }));
+                set({ comments: formattedComments });
             });
+
+            hubConnection.on("ReceiveUserProfiles",(info)=>{
+                const onlineUsersNew = info as Profile[];
+                set({ onlineUsers: onlineUsersNew });
+                const onlineUsers = get().onlineUsers;
+                console.log(onlineUsers);
+            })
+
+            hubConnection.on("UserJoined",(info)=>{
+                const hubConnection = get().hubConnection;
+                if (hubConnection){
+                    console.log("User Joined",info);
+                    hubConnection.invoke("GetUsersInGroup",info[0]);
+                }
+                
+            })
+
+            hubConnection.on("UserLeft",(info)=>{
+                const hubConnection = get().hubConnection;
+                // console.log(info);
+                if(hubConnection){
+                    console.log("User Left",info);
+                    hubConnection.invoke("GetUsersInGroup",info[0]);
+                    
+                }
+            })
 
             hubConnection.on("ReceiveComment", (comment: chatComment) => {
                 const comments = get().comments;
-                console.log("PrevComms: ",comments)
                 const exists = comments.some(c => c.id === comment.id);
                 if (!exists) {
+                    const formattedComment = {
+                        ...comment,
+                        createdAt: formatDateToday(new Date(comment.createdAt).toLocaleString()),
+                    };
                     set((state) => ({
-                        comments: [...state.comments, comment]  // Return the new state with the updated comments array
+                        comments: [...state.comments, formattedComment]  // Return the new state with the updated comments array
                     }));
                 }
 
-                console.log("AfterComms: ",get().comments)
             });
 
             hubConnection.start()

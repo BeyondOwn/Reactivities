@@ -402,7 +402,7 @@ namespace Persistence.Migrations
                         .WithMany("ActivityPosts")
                         .HasForeignKey("CreatorDisplayName")
                         .HasPrincipalKey("DisplayName")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ActivityPosts", "ParentPost")

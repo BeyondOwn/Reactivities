@@ -49,14 +49,13 @@ namespace Persistence
                 .WithMany(u => u.ActivityPosts)
                 .HasForeignKey(e => e.CreatorId)
                 .HasPrincipalKey(u => u.Id)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ActivityPosts>()
                 .HasOne(e => e.Users)
                 .WithMany(u => u.ActivityPosts)
                 .HasForeignKey(e => e.CreatorDisplayName)
-                .HasPrincipalKey(u => u.DisplayName)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasPrincipalKey(u => u.DisplayName);
 
             modelBuilder.Entity<Activity>()
                 .HasOne(e => e.Users)
