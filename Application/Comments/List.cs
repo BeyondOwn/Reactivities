@@ -16,12 +16,12 @@ namespace Application.Comments
 {
     public class List
     {
-        public class Query : IRequest<Result<List<CommentDto>>>
+        public class Query : IRequest<Result<List<chatCommentDto>>>
         {
             public int ActivityId { get; set; }
         }
 
-        public class Handler : IRequestHandler<Query, Result<List<CommentDto>>>
+        public class Handler : IRequestHandler<Query, Result<List<chatCommentDto>>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -33,7 +33,7 @@ namespace Application.Comments
                 _mapper = mapper;
             }
 
-            public async Task<Result<List<CommentDto>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<List<chatCommentDto>>> Handle(Query request, CancellationToken cancellationToken)
             {
 
                 System.Console.WriteLine($"request.ActivityId:{request.ActivityId}");
@@ -41,13 +41,13 @@ namespace Application.Comments
                     .Include(x => x.Activity)
                     .Where(x => x.Activity.Id == request.ActivityId)
                     .OrderBy(x => x.CreatedAt)
-                    .ProjectTo<CommentDto>(_mapper.ConfigurationProvider)
+                    .ProjectTo<chatCommentDto>(_mapper.ConfigurationProvider)
                     .ToListAsync();
 
 
-                if (chatAppComments == null) return Result<List<CommentDto>>.Failure("chatAppComments is null");
+                if (chatAppComments == null) return Result<List<chatCommentDto>>.Failure("chatAppComments is null");
 
-                return Result<List<CommentDto>>.Succes(chatAppComments);
+                return Result<List<chatCommentDto>>.Succes(chatAppComments);
 
 
             }

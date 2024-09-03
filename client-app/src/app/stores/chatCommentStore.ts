@@ -12,12 +12,18 @@ interface chatCommentStore{
     hubConnection: HubConnection | null,
     createHubConnection:(activityId:string,user:User)=>void,
     stopHubConnection: () => void,
-    addComment:(values:any,activityId:string)=>void,
+    addComment:(values:any,activityId:string,imageUrl?:string)=>void,
     getUsersInGroup:(groupName:string)=>void;
+    loadingImageDimensions:boolean,
+    setLoadingImageDimensions:(load:boolean)=>void,
 }
 
 
 export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
+    loadingImageDimensions:true,
+    setLoadingImageDimensions:(load:boolean)=>{
+        set((state) => ({loadingImageDimensions:load}))
+    },
     onlineUsers:[],
     comments:[],
     hubConnection: null,
@@ -27,8 +33,11 @@ export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
             await hubConnection.invoke("GetUsersInGroup",groupName)
         }
     },
-    addComment:async(values:any,activityId:string) =>{
+    addComment:async(values:any,activityId:string,imageUrl?:string) =>{
         values.activityId = Number(activityId);
+        if(imageUrl){
+            values.imageUrl = imageUrl;
+        }
      
             const hubConnection = get().hubConnection;
             if (hubConnection){

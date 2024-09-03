@@ -22,6 +22,7 @@ namespace API.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection Services, IConfiguration config)
         {
             Services.AddEndpointsApiExplorer();
+            Services.AddHttpClient();
             Services.AddSwaggerGen();
             Services.AddMediatR(typeof(List.Handler).Assembly);
             Services.AddAutoMapper(typeof(MappingProfiles).Assembly);

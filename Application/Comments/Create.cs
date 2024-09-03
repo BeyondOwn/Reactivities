@@ -15,9 +15,10 @@ namespace Application.Comments
 {
     public class Create
     {
-        public class Command : IRequest<Result<CommentDto>>
+        public class Command : IRequest<Result<chatCommentDto>>
         {
             public string Body { get; set; }
+            public string? ImageUrl { get; set; }
             public int ActivityId { get; set; }
         }
 
@@ -29,7 +30,7 @@ namespace Application.Comments
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result<CommentDto>>
+        public class Handler : IRequestHandler<Command, Result<chatCommentDto>>
         {
             private readonly DataContext _context;
             private readonly IMapper _mapper;
@@ -42,30 +43,31 @@ namespace Application.Comments
                 _userAccesor = userAccesor;
             }
 
-            public async Task<Result<CommentDto>> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<chatCommentDto>> Handle(Command request, CancellationToken cancellationToken)
             {
                 var activity = await _context.Activities.FindAsync(request.ActivityId);
 
-                if (activity == null) return Result<CommentDto>.Failure("activity is null");
+                if (activity == null) return Result<chatCommentDto>.Failure("activity is null");
 
                 var user = await _context.Users
                     .Include(p => p.Photos)
                     .SingleOrDefaultAsync(x => x.UserName == _userAccesor.GetUsername());
 
-                if (user == null) return Result<CommentDto>.Failure("user is null");
+                if (user == null) return Result<chatCommentDto>.Failure("user is null");
 
                 var comment = new ChatAppComment
                 {
                     Author = user,
                     Activity = activity,
                     Body = request.Body,
+                    ImageUrl = request.ImageUrl
                 };
                 if (activity.ChatAppComments == null) return null;
                 activity.ChatAppComments.Add(comment);
 
                 var succes = await _context.SaveChangesAsync() > 0;
-                if (succes) return Result<CommentDto>.Succes(_mapper.Map<CommentDto>(comment));
-                return Result<CommentDto>.Failure("Failed to add comment");
+                if (succes) return Result<chatCommentDto>.Succes(_mapper.Map<chatCommentDto>(comment));
+                return Result<chatCommentDto>.Failure("Failed to add comment");
 
             }
         }

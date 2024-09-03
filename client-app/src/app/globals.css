@@ -28,7 +28,7 @@
   --ring: 208 100% 45%;
   --radius: 0.75rem;
   --neutral:0 0% 86%;
-  --neutral-hover:0 0% 81%;
+  --neutral-hover:0 0% 78%;
 }
 .dark  {
   /* --background: 208 10% 10%; */
@@ -69,5 +69,12 @@
     font-family: Arial, Helvetica, sans-serif;
     @apply bg-background text-foreground;
   }
+    /* Define a custom class using Tailwind's @apply */
+    .ce-toolbar__plus {
+      @apply bg-neutral text-foreground rounded-full p-2 shadow-lg;
+    }
+    .codex-editor{
+      @apply max-h-fit
+    }
 }
 
