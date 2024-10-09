@@ -5,7 +5,7 @@ import { formSchema } from "@/components/ActivityForm";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
-import agent from "./agent";
+import agent, { baseURL } from "./agent";
 
 
 const setUserAttendanceUpdated = useAttendanceStore.getState().setUserAttendanceUpdated
@@ -49,7 +49,7 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
         }
         setLoadingState(activityId, false);
         try{
-          await agent.requests.post(`http://localhost:5039/api/ActivityAttendance/`,{
+          await agent.requests.post(`${baseURL}/ActivityAttendance/`,{
             userId:user?.id,
             activityId:activityId,
             displayName:user?.displayName
@@ -72,15 +72,15 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
         }
       
       //Setting User attendance
-      const userAttendance = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/userId/${user?.id}`) as Attendance[];
+      const userAttendance = await agent.requests.get(`${baseURL}/ActivityAttendance/userId/${user?.id}`) as Attendance[];
           setUserAttendance(userAttendance);
       //Setting Activity attendance
       if (window.location.href.includes("/activity/")){
-        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/activityId/${activityId}`) as Attendance[];
+        const activityAttendanceh = await agent.requests.get(`${baseURL}/ActivityAttendance/activityId/${activityId}`) as Attendance[];
       setActivityAttendance(activityAttendanceh);
       }
       else{
-        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/`) as Attendance[];
+        const activityAttendanceh = await agent.requests.get(`${baseURL}/ActivityAttendance/`) as Attendance[];
       setActivityAttendance(activityAttendanceh);
       }
       
@@ -88,7 +88,6 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
       setActivityAttendanceUpdated(activityAttendanceUpdated);
       setUserAttendanceUpdated(userAttendanceUpdated);
       // setLoadingState(activityId, false); // Stop loading
-      // router.push(`http://localhost:3000/activity/${activityId}`)
      } 
      catch(error){
       console.log(error);
@@ -136,7 +135,7 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
         }
          setLoadingState(activityId, false); // Start loading
       try{
-        await agent.requests.del(`http://localhost:5039/api/ActivityAttendance/`,{
+        await agent.requests.del(`${baseURL}/ActivityAttendance/`,{
           userId:user?.id,
           activityId:activityId,
         },
@@ -172,15 +171,15 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
       console.log(error)
     }
      //Setting User attendance
-     const userAttendance = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/userId/${user?.id}`) as Attendance[];
+     const userAttendance = await agent.requests.get(`${baseURL}/ActivityAttendance/userId/${user?.id}`) as Attendance[];
      setUserAttendance(userAttendance);
      //Setting Activity attendance
      if (window.location.href.includes("/activity/")){
-      const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/activityId/${activityId}`) as Attendance[];
+      const activityAttendanceh = await agent.requests.get(`${baseURL}/ActivityAttendance/activityId/${activityId}`) as Attendance[];
       setActivityAttendance(activityAttendanceh);
      }
      else{
-      const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/`) as Attendance[];
+      const activityAttendanceh = await agent.requests.get(`${baseURL}/ActivityAttendance/`) as Attendance[];
      setActivityAttendance(activityAttendanceh);
      }
      //
@@ -196,7 +195,7 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
 
   export async function onSubmit(values: z.infer<typeof formSchema>,router:any,refetch:any,setOpen?:Dispatch<SetStateAction<number|null>>,id?:number) {
     try{
-     await agent.requests.put(`http://localhost:5039/api/Activities/edit/id?id=${id}`,values)
+     await agent.requests.put(`${baseURL}/Activities/edit/id?id=${id}`,values)
       }
     catch(error){
      console.log(error);
@@ -214,7 +213,7 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
  
     export async function onDelete(id:number,refetch:any,router?:any) {
     try{
-     await agent.requests.del(`http://localhost:5039/api/Activities/id?id=${id}`)
+     await agent.requests.del(`${baseURL}/Activities/id?id=${id}`)
      if(window.location.href.includes("/activity/")){
         router.push("/");
      }
@@ -235,7 +234,7 @@ export async function onJoin(activityId:number,user:User|null,setLoadingState: (
    export async function onView(id:number,router:any) {
     // const activityAttendanceUpdated = useAttendanceStore.getState().activityAttendanceUpdated
 
-     router.push(`http://localhost:3000/activity/${id}`)
+     router.push(`https://localhost:3000/activity/${id}`)
     //  setActivityAttendanceUpdated(activityAttendanceUpdated)
    }
 

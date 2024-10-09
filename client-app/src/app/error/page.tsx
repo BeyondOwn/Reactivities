@@ -1,12 +1,12 @@
 'use client'
 import { Button } from '@/components/ui/button';
-import { default as agent } from '@/utils/agent';
+import { default as agent, baseURL } from '@/utils/agent';
 import { toast } from "react-toastify";
 import "react-toastify/ReactToastify.css";
 
 
 export default function TestErrors() {
-    const baseUrl = 'http://localhost:5039/api/'
+    const baseUrl = `${baseURL}`
 
 
     function handleNotFound() {

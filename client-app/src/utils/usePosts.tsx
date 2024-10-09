@@ -2,14 +2,14 @@ import { paginatedResults } from "@/app/models/paginatedResults";
 import { Post } from "@/app/models/post";
 import { User } from "@/app/models/user";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import agent from "./agent";
+import agent, { baseURL } from "./agent";
 
 interface ActivitiesProps{
   user: User,
 }
 
 async function fetchPage(activityId:number,pageParam:number): Promise<paginatedResults<Post>> {
-    const result = await agent.requests.get<paginatedResults<Post>>(`http://localhost:5039/api/posts/infinite/${activityId}/${pageParam}`)
+    const result = await agent.requests.get<paginatedResults<Post>>(`${baseURL}/posts/infinite/${activityId}/${pageParam}`)
     // console.log(result.data)
     return result;
   }

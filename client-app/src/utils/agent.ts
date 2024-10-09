@@ -13,10 +13,10 @@ const sleep = (delay: number) => {
 }
 
 const axiosInstance = axios.create({
-    baseURL:"http://localhost:5039/api",
+    baseURL:"https://localhost:7173/api",
 })
 
-const baseURL = "http://localhost:5039/api"
+export const baseURL = "https://localhost:7173/api"
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
@@ -78,21 +78,22 @@ axios.interceptors.response.use(async response =>{
         get: <T>(url: string,config?:AxiosRequestConfig) => axios.get<T>(url,{...config}).then(responseBody),
         post: <T>(url: string, body: {}) =>
              axios.post<T>(url, body).then(responseBody),
-        put: <T>(url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
+        put: <T>(url: string, body: {}) => 
+            axios.put<T>(url, body).then(responseBody),
         del: <T>(url: string, body?: {},config?: AxiosRequestConfig) => 
             axios.delete<T>(url, { data: body, ...config }).then(responseBody)
     }
 
   
     const Account = {
-        current: () => requests.get<User>('http://localhost:5039/api/Account'),
-        login: (user: LoginFormValues) => requests.post<User>('http://localhost:5039/api/Account/login', user),
-        register: (user: RegisterFormValues) => requests.post<User>('http://localhost:5039/api/Account/register', user)
+        current: () => requests.get<User>(`${baseURL}/Account`),
+        login: (user: LoginFormValues) => requests.post<User>(`${baseURL}/Account/login`, user),
+        register: (user: RegisterFormValues) => requests.post<User>(`${baseURL}/Account/register`, user)
     }
 
     const Profiles = {
         get: (username:string) => requests.get<Profile>(`${baseURL}/Profiles/${username}`),
-        uploadPhoto: (file:Blob) =>{
+        uploadPhoto: (file:Blob,fileId:string) =>{
             let formData = new FormData();
             formData.append('File',file);
             return axios.post<Photo>(`${baseURL}/Photos`,formData,{

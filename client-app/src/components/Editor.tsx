@@ -1,6 +1,6 @@
 'use client'
 import { useChatCommentStore } from '@/app/stores/chatCommentStore'
-import agent from '@/utils/agent'
+import agent, { baseURL } from '@/utils/agent'
 import type EditorJS from '@editorjs/editorjs'
 import { BlockToolConstructable } from '@editorjs/editorjs'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,7 +11,7 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { toast } from 'react-toastify'
 import { z, ZodObject, ZodTypeAny } from 'zod'
 
-const BASE_API = "http://localhost:5039/api"
+
 
 
 interface EditorProps {
@@ -116,7 +116,7 @@ const Editor: FC<EditorProps> = ({formSchema,activityId,className}) => {
                     linkTool: {
                         class: LinkTool,
                         config: {
-                            endpoint: `${BASE_API}/Link/fetch-meta`
+                            endpoint: `${baseURL}/Link/fetch-meta`
                         },
                     },
                     image: {

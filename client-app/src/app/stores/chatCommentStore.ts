@@ -12,7 +12,7 @@ interface chatCommentStore{
     hubConnection: HubConnection | null,
     createHubConnection:(activityId:string,user:User)=>void,
     stopHubConnection: () => void,
-    addComment:(values:any,activityId:string,imageUrl?:string)=>void,
+    addComment:(values:any,activityId:string,imageUrl?:string,link?:string[]|null)=>void,
     getUsersInGroup:(groupName:string)=>void;
     loadingImageDimensions:boolean,
     setLoadingImageDimensions:(load:boolean)=>void,
@@ -33,14 +33,18 @@ export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
             await hubConnection.invoke("GetUsersInGroup",groupName)
         }
     },
-    addComment:async(values:any,activityId:string,imageUrl?:string) =>{
+    addComment:async(values:any,activityId:string,imageUrl?:string,link?:string[]|null) =>{
         values.activityId = Number(activityId);
         if(imageUrl){
             values.imageUrl = imageUrl;
         }
+        if (link){
+            values.link = link;
+        }
+        
      
             const hubConnection = get().hubConnection;
-            if (hubConnection){
+            if (hubConnection?.state === "Connected"){
                 await hubConnection.invoke("SendComment", values);
             }
     },
@@ -48,7 +52,7 @@ export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
         console.log("User: ",user);
         console.log('createHubConnection called with activityId:', activityId);
         if (activityId && user?.token){
-            const hubConnection = new HubConnectionBuilder().withUrl('http://localhost:5039/chat?activityId='+ activityId,{
+            const hubConnection = new HubConnectionBuilder().withUrl(`https://localhost:7173/chat?activityId=`+ activityId,{
                 accessTokenFactory: () => user?.token,
                 // skipNegotiation:true,
                 // transport: HttpTransportType.WebSockets
@@ -75,7 +79,7 @@ export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
 
             hubConnection.on("UserJoined",(info)=>{
                 const hubConnection = get().hubConnection;
-                if (hubConnection){
+                if (hubConnection?.state === "Connected"){
                     console.log("User Joined",info);
                     hubConnection.invoke("GetUsersInGroup",info[0]);
                 }
@@ -85,7 +89,7 @@ export const useChatCommentStore = create<chatCommentStore>((set,get) => ({
             hubConnection.on("UserLeft",(info)=>{
                 const hubConnection = get().hubConnection;
                 // console.log(info);
-                if(hubConnection){
+                if(hubConnection?.state === "Connected"){
                     console.log("User Left",info);
                     hubConnection.invoke("GetUsersInGroup",info[0]);
                     

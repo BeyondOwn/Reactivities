@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class initialM : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -246,6 +246,8 @@ namespace Persistence.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AuthorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ActivityId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -287,6 +289,29 @@ namespace Persistence.Migrations
                         column: x => x.DisplayName,
                         principalTable: "AspNetUsers",
                         principalColumn: "DisplayName");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Metadata",
+                columns: table => new
+                {
+                    chatAppCommentId = table.Column<int>(type: "int", nullable: false),
+                    Success = table.Column<bool>(type: "bit", nullable: false),
+                    Href = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SiteName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Metadata", x => x.chatAppCommentId);
+                    table.ForeignKey(
+                        name: "FK_Metadata_ChatAppComments_chatAppCommentId",
+                        column: x => x.chatAppCommentId,
+                        principalTable: "ChatAppComments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -402,7 +427,7 @@ namespace Persistence.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ChatAppComments");
+                name: "Metadata");
 
             migrationBuilder.DropTable(
                 name: "Photos");
@@ -412,6 +437,9 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "ChatAppComments");
 
             migrationBuilder.DropTable(
                 name: "Activities");

@@ -39,6 +39,7 @@ namespace Application.Comments
                 System.Console.WriteLine($"request.ActivityId:{request.ActivityId}");
                 var chatAppComments = await _context.ChatAppComments
                     .Include(x => x.Activity)
+                    .Include(x => x.Metadata)
                     .Where(x => x.Activity.Id == request.ActivityId)
                     .OrderBy(x => x.CreatedAt)
                     .ProjectTo<chatCommentDto>(_mapper.ConfigurationProvider)

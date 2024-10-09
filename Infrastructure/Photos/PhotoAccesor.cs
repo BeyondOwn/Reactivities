@@ -37,6 +37,7 @@ namespace Infrastructure.Photos
                     var uploadParams = new ImageUploadParams
                     {
                         File = new FileDescription(publicId, stream),
+                        PublicId = Path.GetFileNameWithoutExtension(publicId)
                     };
 
                     //     var uploadResult = await _cloudinary.UploadAsync(uploadParams);
@@ -52,6 +53,62 @@ namespace Infrastructure.Photos
                     //     Url = uploadResult.SecureUrl.ToString(),
                     // };
 
+                    var resourceExists = await _cloudinary.GetResourceAsync(new GetResourceParams(publicId));
+                    System.Console.WriteLine(resourceExists.PublicId);
+                    if (resourceExists.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        System.Console.WriteLine("PublicID: ", resourceExists.PublicId);
+                        return new PhotoUploadResults
+                        {
+                            PublicId = resourceExists.PublicId,
+                            Url = resourceExists.SecureUrl.ToString(),
+                        };
+                    }
+                    else
+                    {
+                        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+                        if (uploadResult.Error != null)
+                        {
+                            throw new Exception(uploadResult.Error.Message);
+                        }
+
+                        return new PhotoUploadResults
+                        {
+                            PublicId = publicId,
+                            Url = uploadResult.SecureUrl.ToString(),
+                        };
+                    }
+
+
+                }
+            }
+        }
+
+        public async Task<PhotoUploadResults> AddPhoto(IFormFile file, string userId)
+        {
+            if (file.Length > 0)
+            {
+                await using var stream = file.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(file.FileName, stream),
+                    PublicId = $"{userId}_{Path.GetFileNameWithoutExtension(file.FileName)}"
+                    // Transformation = new Transformation().Height(500).Width(500).Crop("fill")
+                };
+
+                var resourceExists = await _cloudinary.GetResourceAsync(new GetResourceParams(Path.GetFileNameWithoutExtension(file.FileName)));
+                if (resourceExists.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    System.Console.WriteLine(resourceExists.PublicId);
+                    return new PhotoUploadResults
+                    {
+                        PublicId = resourceExists.PublicId,
+                        Url = resourceExists.SecureUrl.ToString(),
+                    };
+                }
+                else
+                {
                     var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
                     if (uploadResult.Error != null)
@@ -61,38 +118,12 @@ namespace Infrastructure.Photos
 
                     return new PhotoUploadResults
                     {
-                        PublicId = uploadResult.PublicId,
+                        PublicId = uploadParams.PublicId,
                         Url = uploadResult.SecureUrl.ToString(),
                     };
-
-                    // return uploadResult.SecureUrl.ToString(); // Return the URL of the uploaded image
-                }
-            }
-        }
-
-        public async Task<PhotoUploadResults> AddPhoto(IFormFile file)
-        {
-            if (file.Length > 0)
-            {
-                await using var stream = file.OpenReadStream();
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(file.FileName, stream),
-                    // Transformation = new Transformation().Height(500).Width(500).Crop("fill")
-                };
-
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-                if (uploadResult.Error != null)
-                {
-                    throw new Exception(uploadResult.Error.Message);
                 }
 
-                return new PhotoUploadResults
-                {
-                    PublicId = uploadResult.PublicId,
-                    Url = uploadResult.SecureUrl.ToString(),
-                };
+
             }
             return null;
         }
@@ -145,5 +176,7 @@ namespace Infrastructure.Photos
 
             return null;
         }
+
+
     }
 }

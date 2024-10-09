@@ -1,3 +1,4 @@
+using System.Net;
 using API.Extensions;
 using API.Middleware;
 using API.SignalR;
@@ -33,13 +34,14 @@ builder.Services.AddFluentValidationAutoValidation()
 .AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<Create>();
 
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAny", policy =>
                 {
-                    policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000");
+                    policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("https://localhost:3000");
                 });
             });
 var app = builder.Build();

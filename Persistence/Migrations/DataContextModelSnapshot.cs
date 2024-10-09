@@ -209,6 +209,9 @@ namespace Persistence.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");
@@ -258,6 +261,39 @@ namespace Persistence.Migrations
                     b.HasIndex("DisplayName");
 
                     b.ToTable("UserActivities");
+                });
+
+            modelBuilder.Entity("Metadata", b =>
+                {
+                    b.Property<int>("chatAppCommentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Href")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SiteName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("chatAppCommentId");
+
+                    b.ToTable("Metadata");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -476,6 +512,17 @@ namespace Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Metadata", b =>
+                {
+                    b.HasOne("Domain.ChatAppComment", "chatAppComment")
+                        .WithOne("Metadata")
+                        .HasForeignKey("Metadata", "chatAppCommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("chatAppComment");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -552,6 +599,11 @@ namespace Persistence.Migrations
                     b.Navigation("UserActivities");
 
                     b.Navigation("chatAppComments");
+                });
+
+            modelBuilder.Entity("Domain.ChatAppComment", b =>
+                {
+                    b.Navigation("Metadata");
                 });
 #pragma warning restore 612, 618
         }

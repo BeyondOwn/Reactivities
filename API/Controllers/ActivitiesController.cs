@@ -24,7 +24,7 @@ namespace API.Controllers
             return HandleResult(await Mediator.Send(new Details.Query { Id = id }));
         }
         [AllowAnonymous]
-        [HttpGet("/view/{pageNumber}")]
+        [HttpGet("view/{pageNumber}")]
         public async Task<IActionResult> GetActivities(int pageNumber)
         {
             var query = new GetPage.Query { PageNumber = pageNumber };

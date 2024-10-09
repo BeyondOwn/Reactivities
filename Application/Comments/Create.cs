@@ -19,6 +19,7 @@ namespace Application.Comments
         {
             public string Body { get; set; }
             public string? ImageUrl { get; set; }
+            public string[]? Link { get; set; }
             public int ActivityId { get; set; }
         }
 
@@ -60,7 +61,8 @@ namespace Application.Comments
                     Author = user,
                     Activity = activity,
                     Body = request.Body,
-                    ImageUrl = request.ImageUrl
+                    ImageUrl = request.ImageUrl,
+                    Link = request.Link
                 };
                 if (activity.ChatAppComments == null) return null;
                 activity.ChatAppComments.Add(comment);

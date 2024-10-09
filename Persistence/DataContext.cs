@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Persistence
 {
     public class DataContext : IdentityDbContext<AppUser>
@@ -18,6 +19,7 @@ namespace Persistence
         public DbSet<Photo> Photos { get; set; }
 
         public DbSet<ChatAppComment> ChatAppComments { get; set; }
+        public DbSet<Metadata> Metadata { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -101,6 +103,17 @@ namespace Persistence
                .HasOne(a => a.Author)
                .WithMany(c => c.chatAppComments)
                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure Metadata entity
+            modelBuilder.Entity<Metadata>()
+                .HasKey(m => m.chatAppCommentId);
+
+            // Configure relationship
+            modelBuilder.Entity<Metadata>()
+                .HasOne(m => m.chatAppComment)
+                .WithOne(c => c.Metadata)
+                .HasForeignKey<Metadata>(m => m.chatAppCommentId)
+                .OnDelete(DeleteBehavior.Cascade); // Optional: configure delete behavior
 
         }
 

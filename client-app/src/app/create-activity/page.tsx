@@ -1,6 +1,6 @@
 'use client'
 import { ActivityForm, formSchema } from "@/components/ActivityForm";
-import agent from "@/utils/agent";
+import agent, { baseURL } from "@/utils/agent";
 import { useActivities } from "@/utils/useActivities";
 import { useUser } from "@/utils/UserContext";
 import { LogIn } from "lucide-react";
@@ -24,7 +24,7 @@ const user = useUser().user;
       //   }
       
       console.log(values)
-        await agent.requests.post("http://localhost:5039/api/Activities",values);
+        await agent.requests.post(`${baseURL}/Activities`,values);
         console.log(values);
         refetch();
         toast.success(`Created activity succesfully!`)

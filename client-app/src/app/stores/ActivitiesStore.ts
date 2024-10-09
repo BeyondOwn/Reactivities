@@ -1,3 +1,4 @@
+import { baseURL } from "@/utils/agent";
 import axios from "axios";
 import { create } from "zustand";
 import { Activity } from "../models/activity";
@@ -21,7 +22,7 @@ export async function fetchGetAll(url: string): Promise<Activity[]> {
   }
  
   export async function fetchPage(pageParam:number): Promise<paginatedResults<Activity>> {
-    const result = await axios.get<paginatedResults<Activity>>(`http://localhost:5039/api/${pageParam}`)
+    const result = await axios.get<paginatedResults<Activity>>(`${baseURL}/api/${pageParam}`)
     // console.log(result.data)
     return result.data;
   }

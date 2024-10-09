@@ -62,7 +62,7 @@ async function DeletePhoto(id:string,handleClose:()=>void,refetch:any){
   
 }
 
-async function onCrop(refetch:any,setLoadingState:(id:number,truth:boolean)=>void) {
+async function onCrop(refetch:any,setLoadingState:(id:number,truth:boolean)=>void,file:string) {
   const setLoading = useProfileStore.getState().setLoading;
   const cropper = useProfileStore.getState().cropper;
   
@@ -71,7 +71,8 @@ async function onCrop(refetch:any,setLoadingState:(id:number,truth:boolean)=>voi
     try {
       cropper.getCroppedCanvas().toBlob(async (blob) => {
         if (blob) {
-          await agent.Profiles.uploadPhoto(blob);
+          console.log(blob)
+          await agent.Profiles.uploadPhoto(blob,file);
           refetch(); // Call refetch after the upload is complete
           setLoadingState(0,false);
           toast.success("File Uploaded")
@@ -172,7 +173,7 @@ const Page: FC<pageProps> = () => {
       <div className='flex py-2 flex-grow rounded-sm'>
         {cropperLoading ? (<LoadingSpinner className='w-[50%]'/>)
         :(
-          <Button onClick={()=>onCrop(refetch,setLoadingState)} className='w-[50%] bg-green-600 hover:bg-green-700'><Check/></Button>
+          <Button onClick={()=>onCrop(refetch,setLoadingState,files[0].path)} className='w-[50%] bg-green-600 hover:bg-green-700'><Check/></Button>
         )}
     
     <Button onClick={()=> {

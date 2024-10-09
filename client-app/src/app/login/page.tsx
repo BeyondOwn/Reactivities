@@ -4,6 +4,7 @@ import GoogleAuthOneTap from '@/components/auth/GoogleAuthOneTap';
 import { Login, formSchema as LoginSchema } from '@/components/Login';
 import { formSchema as RegisterSchema } from '@/components/Register';
 import { Separator } from '@/components/ui/separator';
+import { baseURL } from '@/utils/agent';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { FC } from 'react';
@@ -15,7 +16,7 @@ interface pageProps {
 }
 
 async function onRegister(values: z.infer<typeof RegisterSchema>) {
-    await axios.post("http://localhost:5039/api/Account/register",values,{
+    await axios.post(`${baseURL}/Account/register`,values,{
       headers:{
         "Content-Type":"application/json",
       },

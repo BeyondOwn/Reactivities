@@ -2,6 +2,7 @@
 import { User } from '@/app/models/user';
 import { useCommonStore } from '@/app/stores/commonStore';
 import { useUserStore } from '@/app/stores/userStore';
+import { baseURL } from '@/utils/agent';
 import { hasGrantedAllScopesGoogle, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import Image from 'next/image';
@@ -13,7 +14,7 @@ interface GoogleAuthProps {
 
 const handleLoginSuccess = async (response: any) => {
     try {
-      const result = await axios.post('http://localhost:5039/api/OAuth/signin-google', response);
+      const result = await axios.post(`${baseURL}/OAuth/signin-google`, response);
       const userInfo = result.data as User;
       console.log('Success:', userInfo);
       
@@ -55,7 +56,7 @@ const handleLoginSuccess = async (response: any) => {
             const data = {
               AccessToken: tokenResponse.access_token
             };
-            const result = await axios.post('http://localhost:5039/api/OAuth/signin-google/custom',data );
+            const result = await axios.post(`${baseURL}/OAuth/signin-google/custom`,data );
             console.log('Success:', result.data);
             const userInfo = result.data as User;
   

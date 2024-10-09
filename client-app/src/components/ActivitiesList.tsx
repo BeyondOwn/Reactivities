@@ -15,7 +15,7 @@ import {
   DialogContent,
   DialogTrigger
 } from "@/components/ui/dialog";
-import agent from "@/utils/agent";
+import agent, { baseURL } from "@/utils/agent";
 import { convertUTCDateToLocalDate } from "@/utils/convertUTCDateToLocalDate";
 import { onDelete, onJoin, onLeave, onSubmit, onView } from "@/utils/crudUtils";
 import { useLoading } from "@/utils/LoadingContext";
@@ -57,7 +57,7 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
   async function getAttendance(){
     if(!user) return;
       try{
-        const userAttendance = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/userId/${user?.id}`) as Attendance[];
+        const userAttendance = await agent.requests.get(`${baseURL}/ActivityAttendance/userId/${user?.id}`) as Attendance[];
         setUserAttendance(userAttendance);
        } 
        catch(error){
@@ -67,7 +67,7 @@ export const ActivitiesList: FC<ActivitiesListProps> = () => {
 
     async function getActivityAttendance(){
       try{
-        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/`) as Attendance[];
+        const activityAttendanceh = await agent.requests.get(`${baseURL}/ActivityAttendance/`) as Attendance[];
       setActivityAttendance(activityAttendanceh);
       console.log(activityAttendanceh.length);
       }catch(error){

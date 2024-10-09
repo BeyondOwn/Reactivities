@@ -9,7 +9,7 @@ namespace Application.Interfaces
 {
     public interface IPhotoAccesor
     {
-        Task<PhotoUploadResults> AddPhoto(IFormFile file);
+        Task<PhotoUploadResults> AddPhoto(IFormFile file, string userId);
 
         Task<PhotoUploadResults> UploadImageFromUrlAsync(string imageUrl, string publicId);
 

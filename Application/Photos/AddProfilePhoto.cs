@@ -38,13 +38,14 @@ namespace Application.Photos
 
                 if (user == null) return null;
 
-                var photoUploadResult = await _photoAccesor.AddPhoto(request.File);
+                var photoUploadResult = await _photoAccesor.AddPhoto(request.File, user.Id);
 
                 var photo = new Photo
                 {
                     Url = photoUploadResult.Url,
                     Id = photoUploadResult.PublicId
                 };
+                if (user.Photos.Any(x => x.Id == photo.Id)) return Result<Photo>.Succes(photo);
 
                 if (!user.Photos.Any(x => x.isMain)) photo.isMain = true;
 

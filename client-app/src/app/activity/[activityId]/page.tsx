@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import agent from "@/utils/agent";
+import agent, { baseURL } from "@/utils/agent";
 import { convertUTCDateToLocalDate } from "@/utils/convertUTCDateToLocalDate";
 import { onDelete, onJoin, onLeave, onSubmit } from "@/utils/crudUtils";
 import { useLoading } from "@/utils/LoadingContext";
@@ -36,7 +36,7 @@ interface activityIdInterface{
 }
 
 const fetchActivity = async (id: number) => {
-  const res = await axios.get(`http://localhost:5039/api/Activities/${id}`);
+  const res = await axios.get(`${baseURL}/Activities/${id}`);
   return res.data;
 };
 
@@ -97,11 +97,11 @@ export default function Page({params}:activityIdInterface) {
       "ParentPostId":parentPostId ? parentPostId : null
     }
     try{
-      const res = await agent.requests.post(`http://localhost:5039/api/Posts`,post)
+      const res = await agent.requests.post(`${baseURL}/Posts`,post)
       refetchPost();
       toast.success("Posted Succesfully");
       try{
-        const posts = await agent.requests.get(`http://localhost:5039/api/Posts/${params.activityId}`) as Post[];
+        const posts = await agent.requests.get(`${baseURL}/Posts/${params.activityId}`) as Post[];
       setPosts(posts);
 
       }
@@ -130,7 +130,7 @@ useEffect(()=>{
   async function getAttendance(){
     if(!user) return;
       try{
-        const userAttendance = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/userId/${user?.id}`) as Attendance[];
+        const userAttendance = await agent.requests.get(`${baseURL}/ActivityAttendance/userId/${user?.id}`) as Attendance[];
         setUserAttendance(userAttendance);
        } 
        catch(error){
@@ -140,7 +140,7 @@ useEffect(()=>{
 
     async function getActivityAttendance(){
       try{
-        const activityAttendanceh = await agent.requests.get(`http://localhost:5039/api/ActivityAttendance/activityId/${params.activityId}`) as Attendance[];
+        const activityAttendanceh = await agent.requests.get(`${baseURL}/ActivityAttendance/activityId/${params.activityId}`) as Attendance[];
       setActivityAttendance(activityAttendanceh);
       }catch(error){
         console.log(error)
@@ -179,7 +179,7 @@ useEffect(()=>{
   useEffect(()=>{
     async function getPosts(){
       try{
-      const posts = await agent.requests.get(`http://localhost:5039/api/Posts/${params.activityId}`) as Post[];
+      const posts = await agent.requests.get(`${baseURL}/Posts/${params.activityId}`) as Post[];
       setPosts(posts);
       }catch(error){
         console.log(error)

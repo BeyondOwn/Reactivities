@@ -1,18 +1,20 @@
 'use client'
+import { LinkInfo } from '@/app/models/chatComment';
 import { useChatCommentStore } from '@/app/stores/chatCommentStore';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import agent from '@/utils/agent';
+import agent, { baseURL } from '@/utils/agent';
 import { getImageDimensions } from '@/utils/getImageSize';
 import { useUser } from '@/utils/UserContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleUserRound, PlusCircle, Trash2Icon } from 'lucide-react';
-import ImageNext from 'next/image';
+import { default as ImageNext } from 'next/image';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+const BASE_URL = "https://localhost:7173/api"
 
 interface pageProps {
     params:{
@@ -55,6 +57,9 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
     const [imageUploading,setImageUploading]=useState(false);
     const [imageDimensions,setImageDimensions]=useState<{width:number,height:number}|null>(null);
     const [inputKey, setInputKey] = useState<number>(0);  // Key to force re-render of file input
+    const [links,setLinks] = useState<string[]|null>(null);
+    const [linkInfo, setLinkInfo] = useState<LinkInfoMap>({});
+    const [ScrollCanResume,SetScrollCanResume] = useState(false);
 
     const handleButtonClick = () => {
         // Trigger the file input click
@@ -81,7 +86,7 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
         {
             console.log(file);
 
-            const img = new Image();
+            const img = new window.Image();
             const objectUrl = URL.createObjectURL(file);
 
             img.onload = () => {
@@ -96,7 +101,7 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
 
             img.src = objectUrl;
 
-            const res = await agent.Profiles.uploadPhoto(file);
+            const res = await agent.Profiles.uploadPhoto(file,file.name);
             setImageUrl(res.data.url);
             setImagePreview(res.data.url)
             console.log(res);
@@ -130,6 +135,70 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
     interface ParsedComms{
         [key:string]:boolean
     }
+
+
+    
+    type LinkInfoMap = {
+        [key: string]: LinkInfo | undefined;
+    };
+
+    const processedLinksRef = useRef(new Set()); // To track processed links
+    useEffect(() => {
+        const fetchLinkMetadata = async () => {
+            if (comments.length > 1) {
+                const newMessagesWithLinks = comments.filter(
+                    comment => comment.link && !processedLinksRef.current.has(comment.link) && !comment.metadata
+                );
+                const commentsWithMetaData = comments.filter(
+                    comment => comment.metadata && !processedLinksRef.current.has(comment.link)
+                )
+                for (const message of commentsWithMetaData)
+                {
+                    try{
+                        const metadata:LinkInfo = message.metadata!
+                        if(metadata)
+                        {
+                            setLinkInfo(prevState => ({
+                                ...prevState,
+                                [message.id]: metadata
+                            })); 
+                        }
+                        
+                    }
+                    catch(error){
+                        console.log(error);
+                    }
+                    finally{
+                        processedLinksRef.current.add(message.link); // Mark this link as processed
+                    }
+                }
+                SetScrollCanResume(true);
+                for (const message of newMessagesWithLinks) {
+                    try {
+                        SetScrollCanResume(false);
+                        const info:LinkInfo = await agent.requests.get(`${BASE_URL}/Link/fetch-meta?url=${message.link}`);
+                        if (info) {
+                            setLinkInfo(prevState => ({
+                                ...prevState,
+                                [message.id]: info
+                            }));
+                            const updatedMetadata = info;
+                            const setMetadata = await agent.requests.put(`${baseURL}/Link/edit-chat-comment?Id=${message.id.toString()}`,updatedMetadata);
+                        }
+                    } catch (error) {
+                        console.log(error);
+                    }
+                    finally{
+                        processedLinksRef.current.add(message.link); // Mark this link as processed
+                    }
+                }
+                SetScrollCanResume(true);
+            }
+        };
+
+        fetchLinkMetadata();
+    }, [comments]);
+
     const parsedCommsRef = useRef<ParsedComms>({});  // Using useRef to persist the object across renders
     useEffect(() => {
         const fetchDimensions = async () => {
@@ -171,18 +240,34 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
         fetchDimensions();
     }, [comments]);
 
-    const {clearErrors,register,handleSubmit,getValues,reset,formState:{errors,}} = useForm<z.infer<typeof formSchema>>({
+    const {clearErrors,register,handleSubmit,getValues,reset,watch,formState:{errors,}} = useForm<z.infer<typeof formSchema>>({
         resolver:zodResolver(formSchema)
     });
+    const body = watch('body')
+    useEffect(()=>{
+        
+        if (body){
+            const regex = /https?:\/\/([^\s\/$.?#]+)([^\s]*)/g;
+            const links = body.match(regex);
+            if(links) {
+                setLinks(links);
+                console.log(links);
+            }
+            
+            
+        }
+    },[body])
 
     const onSubmitMessage = (message:z.infer<typeof formSchema>) =>{
         if(!imageUploading){
             console.log("message: ",message);
-        addComment(message,params.activityId.toString(),imageUrl);
+            console.log("link: ",links);
+        addComment(message,params.activityId.toString(),imageUrl,links);
         // bottomRef.current?.scrollIntoView({ behavior: 'instant' });
         clearErrors();
         setImageUrl('');
         reset();
+        setLinks(null);
         }
         else{
             console.log("Wait for image upload to be over");
@@ -217,12 +302,17 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
           
     },[params.activityId,user])
 
-    useEffect(()=>{
-     if (comments.length>1 && !initialScroll && !loadingImageDimensions){
-        bottomRef.current?.scrollIntoView({ behavior: 'instant' });
-        setInitialScroll(true);
-     }   
-    })
+    useEffect(() => {
+        // Check if images are loaded and dimensions are available for all images
+        const allImagesLoaded = comments.every(comment => 
+          !comment.imageUrl || (dimensions[comment.id] && !loadingImageDimensions)
+        );
+    
+        if (comments.length > 1 && !initialScroll && allImagesLoaded && ScrollCanResume) {
+          bottomRef.current?.scrollIntoView({ behavior: 'instant' });
+          setInitialScroll(true);
+        }
+      }, [comments, loadingImageDimensions, dimensions, initialScroll]);
     
    
     useEffect(()=>{
@@ -239,22 +329,35 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
             };
     
             // Scroll to the bottom if the user is at the bottom
-            if (isUserAtBottom()) {
+            if (isUserAtBottom() && ScrollCanResume) {
                 bottomRef.current?.scrollIntoView({ behavior: 'instant' });
             }
         }
         // Function to check if the user is at the bottom
         
     })
+    
 
-    const formatText = (text:string) =>{
+    const formatText = (text: string) => {
+        // Regex to match URLs
+        const urlPattern = /(https?:\/\/[^\s]+)/g;
+    
         return text.split('\n').map((line, index) => (
             <React.Fragment key={index}>
-              {line}
-              <br />
+                {line.split(urlPattern).map((part, index) => 
+                    urlPattern.test(part) ? (
+                        <a className='text-blue-400 hover:underline' key={index} href={part} target="_blank" rel="noopener noreferrer">
+                            {part}
+                        </a>
+                    ) : (
+                        part
+                    )
+                )}
+                <br />
             </React.Fragment>
-          ));
-    }
+        ));
+    };
+
 
     // Function to convert a hash value to a hex color
     const hashToHex = (hash:any) => {
@@ -282,11 +385,13 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
     <div className='flex flex-col justify-center border-2 border-foreground w-[90%] min-h-[5%] max-h-[5%] border-b-0 bg-background rounded-t-sm'>
         <span className='sm:ml-6 text-3xl font-bold'>Chat</span>
     </div>
-    <div className='flex w-[90%] max-h-[73%] sm:max-h-[82%] bg-neutral border-2 border-foreground'>
+    <div className='flex w-[90%] h-[72%] sm:min-h-[78%] sm:max-h-[82%] bg-neutral border-2 border-foreground'>
     <div ref={containerRef} className='scrollbar-thin bg-neutral flex flex-col w-[100%] sm:w-[80%] max-h-[100%] sm:max-h-[100%]  overflow-x-hidden overflow-y-scroll'>
     <div className='flex flex-col'>
-    {comments.map(comment =>(
-        <div className=' flex gap-2 sm:pl-4 py-2' ref={el => { refs.current[comment.id.toString()] = el; }} key={comment.id}>
+    {comments.map(comment =>{
+        console.log("comment structure:",linkInfo[comment.id.toString()])
+        return (
+            <div className=' flex gap-2 sm:pl-4 py-2' ref={el => { refs.current[comment.id.toString()] = el; }} key={comment.id}>
             {/* <Image alt='comment image avatar' src={comment.image}/> */}
             <div className='min-w-[40px]'>{comment.image && comment.image != "empty" ? <ImageNext className='rounded-full' width={40} height={40} alt='user profile pic' src={comment.image}/> : <CircleUserRound className='w-10 h-10'/>}</div>
             <div className='flex flex-col justify-start'>
@@ -305,9 +410,29 @@ const Page: FC<pageProps> = ({params}:pageProps) => {
                     <LoadingSpinner/>
                  )
             :null}
+            {comment.link && comment.metadata?.success || comment.link && linkInfo[comment.id.toString()] && linkInfo[comment.id.toString()]?.success ? (
+                <div className='flex flex-col min-h-[100px] sm:min-h-[170px]  sm:w-[440px] bg-card gap-2 p-3 border-l-4 border-red-500 rounded-sm'>
+                    <span className=''>{linkInfo[comment.id.toString()]?.siteName}</span>
+                    <a className='font-bold text-blue-400 hover:underline w-fit' href={linkInfo[comment.id.toString()]?.href}>{linkInfo[comment.id.toString()]?.title}</a>
+                    <span className='max-h-[70px] overflow-hidden'>{linkInfo[comment.id.toString()]?.description}</span>
+                    {/* <Button onClick={()=>console.log(linkInfo[comment.id.toString()])}>t</Button> */}
+                        {linkInfo[comment.id.toString()]?.imageUrl ? (
+                            <a className='min-h-[100px] min-w-[200px] sm:min-h-[231px] sm:min-w-[412px]' href={linkInfo[comment.id.toString()]?.href}>
+                            <img className='rounded-sm' alt='site img' src={linkInfo[comment.id.toString()]?.imageUrl ?? ""}/> 
+                            </a>
+                        ) :
+                        (
+                            <div className='min-h-[100px] min-w-[200px] sm:min-h-[231px] sm:min-w-[412px]'></div>
+                        )}
+                        
+                    
+                </div>
+            ):null}
             </div>
         </div>
-    ))}
+        )
+        
+})}
    <div className='h-[1px]' ref={bottomRef}></div>
    {/* HERE */}
    {imagePreview || imageUploading?  (
