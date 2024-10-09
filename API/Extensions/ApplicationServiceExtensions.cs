@@ -28,10 +28,8 @@ namespace API.Extensions
             Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             Services.AddScoped<IUserAccesor, UserAccesor>();
             Services.AddSignalR();
-            Services.AddDbContext<DataContext>(opt =>
-            {
-                opt.UseSqlServer(config.GetConnectionString("DefaultConnection"));
-            });
+            Services.AddDbContext<DataContext>(options =>
+        options.UseMySql(config.GetConnectionString("MYSQLCONNSTR_localdb"), new MySqlServerVersion(new Version(8, 0, 21))));
             Services.Configure<CloudinarySettings>(config.GetSection("Cloudinary"));
             Services.AddScoped<IPhotoAccesor, PhotoAccesor>();
             return Services;
