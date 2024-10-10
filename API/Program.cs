@@ -35,7 +35,7 @@ builder.Services.AddControllers(opt =>
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-    serverOptions.ListenAnyIP(Int32.Parse(port));
+    serverOptions.Listen(System.Net.IPAddress.Any, Int32.Parse(port));
 });
 
 // Add configuration setup to the existing builder
