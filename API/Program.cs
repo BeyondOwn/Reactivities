@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Writers;
 using Persistence;
 
@@ -31,12 +30,6 @@ builder.Services.AddControllers(opt =>
     opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 })
 ;
-
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "5001";
-    serverOptions.Listen(System.Net.IPAddress.Any, Int32.Parse(port));
-});
 
 // Add configuration setup to the existing builder
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
